@@ -31,21 +31,10 @@
 
 									@include('alerts.alerts')
 
-									<div class="form-group">
-										<label for="name">{{ __('Set Image') }} *</label>
-										<br>
-											<img class="admin-img" src="{{  url('/core/public/storage/images/placeholder.png') }}"
-												alt="No Image Found">
-										<br>
-										<span class="mt-1">{{ __('Image Size Should Be 708 x 277.') }}</span>
-									</div>
+									@include('back.post.partials.image-upload', ['inputId' => 'blog-photo-create'])
 
-									<div class="form-group position-relative ">
-										<label class="file">
-											<input type="file"  accept="image/*"  class="upload-photo" name="photo[]" multiple id="file"
-												aria-label="File browser example" >
-											<span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-										</label>
+									<div class="form-group">
+										<span class="mt-1">{{ __('Image Size Should Be 708 x 277.') }}</span>
 									</div>
 									<div class="form-group">
 										<label for="title">{{ __('Title') }} *</label>
@@ -115,4 +104,8 @@
 
 </div>
 
+@endsection
+
+@section('scripts')
+	@include('back.post.partials.image-upload-scripts')
 @endsection

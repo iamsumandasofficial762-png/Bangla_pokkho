@@ -2,6 +2,7 @@
     $grandSubtotal = 0;
     $qty = 0;
     $option_price = 0;
+    $isHomePage = request()->routeIs('front.index');
 @endphp
 @if (Session::has('cart'))
     @foreach (Session::get('cart') as $key => $cart)
@@ -34,15 +35,15 @@
         </div>
     @endforeach
     <div class="text-right">
-        <p class="text-gray-dark py-2 mb-0"><span class="text-muted">{{ __('Subtotal') }}:</span>
+        <p class="text-gray-dark py-2 mb-0"><span class="text-muted">{{ $isHomePage ? 'উপমোট' : __('Subtotal') }}:</span>
             {{ PriceHelper::setCurrencyPrice($grandSubtotal) }}</p>
     </div>
     <div class="d-flex justify-content-between">
         <div class="w-50 d-block"><a class="btn btn-primary btn-sm  mb-0"
-                href="{{ route('front.cart') }}"><span>{{ __('Cart') }}</span></a></div>
+                href="{{ route('front.cart') }}"><span>{{ $isHomePage ? 'কার্ট' : __('Cart') }}</span></a></div>
         <div class="w-50 d-block text-end"><a class="btn btn-primary btn-sm  mb-0"
-                href="{{ route('front.checkout.billing') }}"><span>{{ __('Checkout') }}</span></a></div>
+                href="{{ route('front.checkout.billing') }}"><span>{{ $isHomePage ? 'চেকআউট' : __('Checkout') }}</span></a></div>
     @else
-        {{ __('Cart empty') }}
+        {{ $isHomePage ? 'কার্ট খালি' : __('Cart empty') }}
 @endif
 </div>

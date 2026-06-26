@@ -54,6 +54,83 @@
         href="{{ asset('assets/front/css/color.php?primary_color=') . str_replace('#', '', $setting->primary_color) }}"
         rel="stylesheet">
 
+    @php
+        $themePrimary = $setting->primary_color ?: '#ff3300';
+        $themePrimary = '#' . ltrim($themePrimary, '#');
+        if (!preg_match('/^#[0-9a-fA-F]{6}$/', $themePrimary)) {
+            $themePrimary = '#ff3300';
+        }
+
+        $themeRgb = sscanf($themePrimary, '#%02x%02x%02x');
+        $mixThemeColor = function ($rgb, $target, $weight) {
+            return sprintf(
+                '#%02x%02x%02x',
+                round($rgb[0] * $weight + $target[0] * (1 - $weight)),
+                round($rgb[1] * $weight + $target[1] * (1 - $weight)),
+                round($rgb[2] * $weight + $target[2] * (1 - $weight))
+            );
+        };
+        $themePrimaryHover = $mixThemeColor($themeRgb, [0, 0, 0], .82);
+        $themePrimaryLight = $mixThemeColor($themeRgb, [255, 255, 255], .12);
+        $themeHeading = $mixThemeColor($themeRgb, [7, 19, 12], .34);
+    @endphp
+    <style id="dynamic-theme-colors">
+        :root {
+            --theme-primary: {{ $themePrimary }};
+            --theme-primary-hover: {{ $themePrimaryHover }};
+            --theme-primary-light: {{ $themePrimaryLight }};
+            --theme-primary-rgb: {{ implode(', ', $themeRgb) }};
+            --theme-heading: {{ $themeHeading }};
+        }
+
+        .menu-top-area,
+        .left-category-area .category-header,
+        .count-label,
+        .badge-primary,
+        .bg-primary {
+            background-color: var(--theme-primary) !important;
+        }
+
+        .site-menu > ul > li.active > a,
+        .site-menu > ul > li > a:hover,
+        .site-menu .t-h-dropdown-menu a.active,
+        .site-menu .t-h-dropdown-menu a:hover,
+        .slideable-menu li.active > a,
+        .slideable-menu a.active,
+        .text-primary,
+        .toolbar .toolbar-item > a:hover,
+        .search-box button:hover,
+        .left-category-area .category-list .navi-link:hover,
+        .left-category-area .category-list .navi-link:hover span,
+        .t-h-dropdown-menu a.active,
+        .t-h-dropdown-menu a:hover {
+            color: var(--theme-primary) !important;
+        }
+
+        .btn-primary,
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active {
+            border-color: var(--theme-primary) !important;
+            background-color: var(--theme-primary) !important;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active {
+            border-color: var(--theme-primary-hover) !important;
+            background-color: var(--theme-primary-hover) !important;
+        }
+
+        .form-control:focus,
+        .categoris:focus,
+        .search-box:focus-within,
+        .btn-primary:focus {
+            border-color: var(--theme-primary) !important;
+            box-shadow: 0 0 0 .18rem rgba(var(--theme-primary-rgb), .16) !important;
+        }
+    </style>
+
     @yield('pagestyles')
 
     <!-- Modernizr-->
@@ -108,6 +185,44 @@ body_theme4 @endif
     @endif
 
     <!-- Header-->
+    @php
+        $isHomePage = request()->routeIs('front.index');
+        $homeUiText = [
+            'Track Order' => 'অর্ডার ট্র্যাক করুন',
+            'Compare' => 'তুলনা',
+            'Wishlist' => 'পছন্দের তালিকা',
+            'Currency' => 'মুদ্রা',
+            'Login' => 'লগইন',
+            'All' => 'সব',
+            'Search by product name' => 'পণ্যের নাম দিয়ে খুঁজুন',
+            'Menu' => 'মেনু',
+            'Cart' => 'কার্ট',
+            'Navigation' => 'নেভিগেশন',
+            'Category' => 'ক্যাটাগরি',
+            'Home' => 'হোম',
+            'Shop' => 'দোকান',
+            'Campaign' => 'প্রচারাভিযান',
+            'Brand' => 'ব্র্যান্ড',
+            'Blog' => 'ব্লগ',
+            'Pages' => 'পেজ',
+            'Faq' => 'প্রশ্নোত্তর',
+            'Contact' => 'যোগাযোগ',
+            'Your e-mail' => 'আপনার ই-মেইল',
+            'Subscribe' => 'সাবস্ক্রাইব করুন',
+            'Get In Touch' => 'যোগাযোগের তথ্য',
+            'Address' => 'ঠিকানা',
+            'Phone' => 'ফোন',
+            'Email' => 'ই-মেইল',
+            'Usefull Links' => 'প্রয়োজনীয় লিংক',
+            'Newsletter' => 'নিউজলেটার',
+            'Subscribe to our Newsletter to receive early discount offers, latest news, sales and promo information.' => 'প্রথম দিকের ছাড়, সর্বশেষ খবর, বিক্রয় ও প্রচার তথ্য পেতে আমাদের নিউজলেটারে সাবস্ক্রাইব করুন।',
+            'Days' => 'দিন',
+            'Hrs' => 'ঘণ্টা',
+            'Min' => 'মিনিট',
+            'Sec' => 'সেকেন্ড',
+        ];
+        $homeLabel = fn ($text) => $isHomePage ? ($homeUiText[$text] ?? __($text)) : __($text);
+    @endphp
 
     <header class="site-header navbar-sticky">
         <div class="menu-top-area">
@@ -116,9 +231,9 @@ body_theme4 @endif
                     <div class="col-md-4">
                         <div class="t-m-s-a">
                             <a class="track-order-link" href="{{ route('front.order.track') }}"><i
-                                    class="icon-map-pin"></i>{{ __('Track Order') }}</a>
+                                    class="icon-map-pin"></i>{{ $homeLabel('Track Order') }}</a>
                             <a class="track-order-link compare-mobile d-lg-none"
-                                href="{{ route('fornt.compare.index') }}">{{ __('Compare') }}</a>
+                                href="{{ route('fornt.compare.index') }}">{{ $homeLabel('Compare') }}</a>
                         </div>
                     </div>
                     <div class="col-md-8">
@@ -126,7 +241,7 @@ body_theme4 @endif
 
                             <a class="track-order-link wishlist-mobile d-inline-block d-lg-none"
                                 href="{{ route('user.wishlist.index') }}"><i
-                                    class="icon-heart"></i>{{ __('Wishlist') }}</a>
+                                    class="icon-heart"></i>{{ $homeLabel('Wishlist') }}</a>
 
                             {{-- <div class="t-h-dropdown ">
                                 <a class="main-link" href="#">{{ __('Language') }}<i
@@ -142,7 +257,7 @@ body_theme4 @endif
 
 
                             <div class="t-h-dropdown ">
-                                <a class="main-link" href="#">{{ __('Currency') }}<i
+                                <a class="main-link" href="#">{{ $homeLabel('Currency') }}<i
                                         class="icon-chevron-down"></i></a>
                                 <div class="t-h-dropdown-menu">
                                     @foreach (DB::table('currencies')->get() as $currency)
@@ -156,7 +271,7 @@ body_theme4 @endif
                             <div class="login-register ">
                                 @if (!Auth::user())
                                     <a class="track-order-link mr-0" href="{{ route('user.login') }}">
-                                        {{ __('Login') }}
+                                        {{ $homeLabel('Login') }}
                                     </a>
                                 @else
                                     <div class="t-h-dropdown">
@@ -194,7 +309,7 @@ body_theme4 @endif
                                 <div class="search-box-inner align-self-center">
                                     <div class="search-box d-flex">
                                         <select name="category" id="category_select" class="categoris">
-                                            <option value="">{{ __('All') }}</option>
+                                            <option value="">{{ $homeLabel('All') }}</option>
                                             @foreach (DB::table('categories')->whereStatus(1)->get() as $category)
                                                 <option value="{{ $category->slug }}">{{ $category->name }}</option>
                                             @endforeach
@@ -209,7 +324,7 @@ body_theme4 @endif
                                             <input class="form-control" type="text"
                                                 data-target="{{ route('front.search.suggest') }}"
                                                 id="__product__search" name="search"
-                                                placeholder="{{ __('Search by product name') }}">
+                                                placeholder="{{ $homeLabel('Search by product name') }}">
                                             <div class="serch-result d-none">
                                                 {{-- search result --}}
                                             </div>
@@ -229,7 +344,7 @@ body_theme4 @endif
                                 </div>
                                 <div class="toolbar-item visible-on-mobile mobile-menu-toggle"><a href="#">
                                         <div><i class="icon-menu"></i><span
-                                                class="text-label">{{ __('Menu') }}</span></div>
+                                                class="text-label">{{ $homeLabel('Menu') }}</span></div>
                                     </a>
                                 </div>
 
@@ -237,7 +352,7 @@ body_theme4 @endif
                                         href="{{ route('fornt.compare.index') }}">
                                         <div><span class="compare-icon"><i class="icon-repeat"></i><span
                                                     class="count-label compare_count">{{ Session::has('compare') ? count(Session::get('compare')) : '0' }}</span></span><span
-                                                class="text-label">{{ __('Compare') }}</span></div>
+                                                class="text-label">{{ $homeLabel('Compare') }}</span></div>
                                     </a>
                                 </div>
                                 @if (Auth::check())
@@ -245,21 +360,21 @@ body_theme4 @endif
                                             href="{{ route('user.wishlist.index') }}">
                                             <div><span class="compare-icon"><i class="icon-heart"></i><span
                                                         class="count-label wishlist_count">{{ Auth::user()->wishlists->count() }}</span></span><span
-                                                    class="text-label">{{ __('Wishlist') }}</span></div>
+                                                    class="text-label">{{ $homeLabel('Wishlist') }}</span></div>
                                         </a>
                                     </div>
                                 @else
                                     <div class="toolbar-item hidden-on-mobile"><a
                                             href="{{ route('user.wishlist.index') }}">
                                             <div><span class="compare-icon"><i class="icon-heart"></i></span><span
-                                                    class="text-label">{{ __('Wishlist') }}</span></div>
+                                                    class="text-label">{{ $homeLabel('Wishlist') }}</span></div>
                                         </a>
                                     </div>
                                 @endif
                                 <div class="toolbar-item"><a href="{{ route('front.cart') }}">
                                         <div><span class="cart-icon"><i class="icon-shopping-cart"></i><span
                                                     class="count-label cart_count">{{ Session::has('cart') ? count(Session::get('cart')) : '0' }}
-                                                </span></span><span class="text-label">{{ __('Cart') }}</span>
+                                                </span></span><span class="text-label">{{ $homeLabel('Cart') }}</span>
                                         </div>
                                     </a>
                                     <div class="toolbar-dropdown cart-dropdown widget-cart  cart_view_header"
@@ -273,7 +388,7 @@ body_theme4 @endif
                             <div class="mobile-menu">
                                 <!-- Slideable (Mobile) Menu-->
                                 <div class="mm-heading-area">
-                                    <h4>{{ __('Navigation') }}</h4>
+                                    <h4>{{ $homeLabel('Navigation') }}</h4>
                                     <div class="toolbar-item visible-on-mobile mobile-menu-toggle mm-t-two">
                                         <a href="#">
                                             <div> <i class="icon-x"></i></div>
@@ -284,12 +399,12 @@ body_theme4 @endif
                                     <li class="nav-item" role="presentation99">
                                         <span class="active" id="mmenu-tab" data-bs-toggle="tab"
                                             data-bs-target="#mmenu" role="tab" aria-controls="mmenu"
-                                            aria-selected="true">{{ __('Menu') }}</span>
+                                            aria-selected="true">{{ $homeLabel('Menu') }}</span>
                                     </li>
                                     <li class="nav-item" role="presentation99">
                                         <span class="" id="mcat-tab" data-bs-toggle="tab"
                                             data-bs-target="#mcat" role="tab" aria-controls="mcat"
-                                            aria-selected="false">{{ __('Category') }}</span>
+                                            aria-selected="false">{{ $homeLabel('Category') }}</span>
                                     </li>
 
                                 </ul>
@@ -300,27 +415,27 @@ body_theme4 @endif
                                             <ul>
                                                 <li class="{{ request()->routeIs('front.index') ? 'active' : '' }}"><a
                                                         href="{{ route('front.index') }}"><i
-                                                            class="icon-chevron-right"></i>{{ __('Home') }}</a>
+                                                            class="icon-chevron-right"></i>{{ $homeLabel('Home') }}</a>
                                                 </li>
                                                 @if ($setting->is_shop == 1)
                                                     <li
                                                         class="{{ request()->routeIs('front.catalog*') ? 'active' : '' }}">
                                                         <a href="{{ route('front.catalog') }}"><i
-                                                                class="icon-chevron-right"></i>{{ __('Shop') }}</a>
+                                                                class="icon-chevron-right"></i>{{ $homeLabel('Shop') }}</a>
                                                     </li>
                                                 @endif
                                                 @if ($setting->is_campaign == 1)
                                                     <li
                                                         class="{{ request()->routeIs('front.campaign') ? 'active' : '' }}">
                                                         <a href="{{ route('front.campaign') }}"><i
-                                                                class="icon-chevron-right"></i>{{ __('Campaign') }}</a>
+                                                                class="icon-chevron-right"></i>{{ $homeLabel('Campaign') }}</a>
                                                     </li>
                                                 @endif
                                                 @if ($setting->is_brands == 1)
                                                     <li
                                                         class="{{ request()->routeIs('front.brand') ? 'active' : '' }}">
                                                         <a href="{{ route('front.brand') }}"><i
-                                                                class="icon-chevron-right"></i>{{ __('Brand') }}</a>
+                                                                class="icon-chevron-right"></i>{{ $homeLabel('Brand') }}</a>
                                                     </li>
                                                 @endif
 
@@ -328,18 +443,18 @@ body_theme4 @endif
                                                     <li
                                                         class="{{ request()->routeIs('front.blog*') ? 'active' : '' }}">
                                                         <a href="{{ route('front.blog') }}"><i
-                                                                class="icon-chevron-right"></i>{{ __('Blog') }}</a>
+                                                                class="icon-chevron-right"></i>{{ $homeLabel('Blog') }}</a>
                                                     </li>
                                                 @endif
                                                 <li class="t-h-dropdown">
                                                     <a class="" href="#"><i
-                                                            class="icon-chevron-right"></i>{{ __('Pages') }} <i
+                                                            class="icon-chevron-right"></i>{{ $homeLabel('Pages') }} <i
                                                             class="icon-chevron-down"></i></a>
                                                     <div class="t-h-dropdown-menu">
                                                         @if ($setting->is_faq == 1)
                                                             <a class="{{ request()->routeIs('front.faq*') ? 'active' : '' }}"
                                                                 href="{{ route('front.faq') }}"><i
-                                                                    class="icon-chevron-right pr-2"></i>{{ __('Faq') }}</a>
+                                                                    class="icon-chevron-right pr-2"></i>{{ $homeLabel('Faq') }}</a>
                                                         @endif
                                                         @foreach (DB::table('pages')->wherePos(0)->orwhere('pos', 2)->get() as $page)
                                                             <a class="{{ request()->url() == route('front.page', $page->slug) ? 'active' : '' }} "
@@ -353,7 +468,7 @@ body_theme4 @endif
                                                     <li
                                                         class="{{ request()->routeIs('front.contact') ? 'active' : '' }}">
                                                         <a href="{{ route('front.contact') }}"><i
-                                                                class="icon-chevron-right"></i>{{ __('Contact') }}</a>
+                                                                class="icon-chevron-right"></i>{{ $homeLabel('Contact') }}</a>
                                                     </li>
                                                 @endif
                                             </ul>
@@ -417,7 +532,7 @@ body_theme4 @endif
                         @csrf
                         <div class="input-group">
                             <input class="form-control" type="email" name="email"
-                                placeholder="{{ __('Your e-mail') }}">
+                                placeholder="{{ $homeLabel('Your e-mail') }}">
                             <span class="input-group-addon"><i class="icon-mail"></i></span>
                         </div>
                         <div aria-hidden="true">
@@ -425,7 +540,7 @@ body_theme4 @endif
                         </div>
 
                         <button class="btn btn-primary btn-block mt-2" type="submit">
-                            <span>{{ __('Subscribe') }}</span>
+                            <span>{{ $homeLabel('Subscribe') }}</span>
                         </button>
                     </form>
                 </div>
@@ -447,10 +562,10 @@ body_theme4 @endif
                 <div class="col-lg-4 col-md-6">
                     <!-- Contact Info-->
                     <section class="widget widget-light-skin">
-                        <h3 class="widget-title">{{ __('Get In Touch') }}</h3>
-                        <p class="mb-1"><strong>{{ __('Address') }}: </strong> {{ $setting->footer_address }}</p>
-                        <p class="mb-1"><strong>{{ __('Phone') }}: </strong> {{ $setting->footer_phone }}</p>
-                        <p class="mb-1"><strong>{{ __('Email') }}: </strong> {{ $setting->footer_email }}</p>
+                        <h3 class="widget-title">{{ $homeLabel('Get In Touch') }}</h3>
+                        <p class="mb-1"><strong>{{ $homeLabel('Address') }}: </strong> {{ $setting->footer_address }}</p>
+                        <p class="mb-1"><strong>{{ $homeLabel('Phone') }}: </strong> {{ $setting->footer_phone }}</p>
+                        <p class="mb-1"><strong>{{ $homeLabel('Email') }}: </strong> {{ $setting->footer_email }}</p>
                         <ul class="list-unstyled text-sm">
                             <li><span class=""><strong>{{ $setting->working_days_from_to }}:
                                     </strong></span>{{ $setting->friday_start }} - {{ $setting->friday_end }}</li>
@@ -471,11 +586,11 @@ body_theme4 @endif
                 <div class="col-lg-4 col-sm-6">
                     <!-- Customer Info-->
                     <div class="widget widget-links widget-light-skin">
-                        <h3 class="widget-title">{{ __('Usefull Links') }}</h3>
+                        <h3 class="widget-title">{{ $homeLabel('Usefull Links') }}</h3>
                         <ul>
                             @if ($setting->is_faq == 1)
                                 <li>
-                                    <a class="" href="{{ route('front.faq') }}">{{ __('Faq') }}</a>
+                                    <a class="" href="{{ route('front.faq') }}">{{ $homeLabel('Faq') }}</a>
                                 </li>
                             @endif
                             @foreach (DB::table('pages')->wherePos(2)->orwhere('pos', 1)->get() as $page)
@@ -488,14 +603,14 @@ body_theme4 @endif
                 <div class="col-lg-4">
                     <!-- Subscription-->
                     <section class="widget">
-                        <h3 class="widget-title">{{ __('Newsletter') }}</h3>
+                        <h3 class="widget-title">{{ $homeLabel('Newsletter') }}</h3>
                         <form class="row subscriber-form" action="{{ route('front.subscriber.submit') }}"
                             method="post">
                             @csrf
                             <div class="col-sm-12">
                                 <div class="input-group">
                                     <input class="form-control" type="email" name="email"
-                                        placeholder="{{ __('Your e-mail') }}">
+                                        placeholder="{{ $homeLabel('Your e-mail') }}">
                                     <span class="input-group-addon"><i class="icon-mail"></i></span>
                                 </div>
                                 <div aria-hidden="true">
@@ -506,12 +621,12 @@ body_theme4 @endif
                             </div>
                             <div class="col-sm-12">
                                 <button class="btn btn-primary btn-block mt-2" type="submit">
-                                    <span>{{ __('Subscribe') }}</span>
+                                    <span>{{ $homeLabel('Subscribe') }}</span>
                                 </button>
                             </div>
                             <div class="col-lg-12">
                                 <p class="text-sm opacity-80 pt-2">
-                                    {{ __('Subscribe to our Newsletter to receive early discount offers, latest news, sales and promo information.') }}
+                                    {{ $homeLabel('Subscribe to our Newsletter to receive early discount offers, latest news, sales and promo information.') }}
                                 </p>
                             </div>
                         </form>
@@ -556,10 +671,10 @@ body_theme4 @endif
 
     <script>
         let language = {
-            Days: '{{ __('Days') }}',
-            Hrs: '{{ __('Hrs') }}',
-            Min: '{{ __('Min') }}',
-            Sec: '{{ __('Sec') }}',
+            Days: '{{ $homeLabel('Days') }}',
+            Hrs: '{{ $homeLabel('Hrs') }}',
+            Min: '{{ $homeLabel('Min') }}',
+            Sec: '{{ $homeLabel('Sec') }}',
         }
     </script>
 

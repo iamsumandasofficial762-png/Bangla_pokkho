@@ -33,46 +33,15 @@
 
                                     @include('alerts.alerts')
 
-                                    <h5 class="">
-                                        <b>{{ __('Multiple Images Uploading Are Allowed') }}</b>
-                                    </h5>
+                                    @php
+                                        $blogPhotos = json_decode($post->photo, true) ?: [];
+                                        $mainBlogPhoto = $blogPhotos[array_key_first($blogPhotos)] ?? null;
+                                    @endphp
 
-                                    <br>
-
-                                    <div class="d-block">
-
-                                        @forelse(json_decode($post->photo,true) as $key => $photo)
-                                            <div class="single-g-item d-inline-block m-2">
-												@if ($key !=0)
-												<span data-toggle="modal" data-target="#confirm-delete" href="javascript:;"
-												data-href="{{ route('back.post.photo.delete', [$key, $post->id]) }}"
-												class="remove-gallery-img">
-												<i class="fas fa-trash"></i>
-											</span>
-												@endif
-                                             
-                                                <a class="popup-link"
-                                                    href="{{ $photo ? url('/core/public/storage/images/' . $photo) : url('/core/public/storage/images/placeholder.png') }}">
-                                                    <img class="admin-gallery-img"
-                                                        src="{{ $photo ? url('/core/public/storage/images/' . $photo) : url('/core/public/storage/images/placeholder.png') }}"
-                                                        alt="No Image Found">
-                                                </a>
-                                            </div>
-                                        @empty
-
-                                            <h6><b>{{ __('No Images Added') }}</b></h6>
-                                        @endforelse
-
-                                    </div>
-
-
-                                    <div class="form-group position-relative ">
-                                        <label class="file">
-                                            <input type="file" accept="image/*" name="photo[]" id="file"
-                                                aria-label="File browser example" accept="image/*" multiple>
-                                            <span class="file-custom text-left">{{ __('Upload Images...') }}</span>
-                                        </label>
-                                    </div>
+                                    @include('back.post.partials.image-upload', [
+                                        'inputId' => 'blog-photo-edit',
+                                        'currentPhoto' => $mainBlogPhoto,
+                                    ])
                                     <div class="form-group">
                                         <label for="title">{{ __('Title') }} *</label>
                                         <input type="text" name="title" class="form-control" id="title"
@@ -173,4 +142,8 @@
     </div>
 
     {{-- DELETE MODAL ENDS --}}
+@endsection
+
+@section('scripts')
+    @include('back.post.partials.image-upload-scripts')
 @endsection

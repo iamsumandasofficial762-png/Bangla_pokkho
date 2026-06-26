@@ -60,7 +60,7 @@ class PostController extends Controller
     {
 
         $request->validate([
-            'photo*' => 'required|image',
+            'photo' => 'required|image|mimes:jpg,jpeg,png,webp',
             'title' => 'required|unique:posts|max:255',
             'details' => 'required',
             'tags' => 'nullable|max:255'
@@ -78,6 +78,8 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        $this->repository->syncPublicImages($post);
+
         return view('back.post.edit',compact('post'));
     }
 
@@ -91,7 +93,7 @@ class PostController extends Controller
     public function update(Request $request, Post $post)
     {
         $request->validate([
-            'photo*' => 'image',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp',
             'title' => 'required|max:255|unique:posts,title,'.$post->id,
             'category_id' => 'required',
             'details' => 'required',

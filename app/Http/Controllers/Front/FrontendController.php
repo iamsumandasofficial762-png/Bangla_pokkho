@@ -69,8 +69,52 @@ class FrontendController extends Controller
 
         $recentPosts = $homePosts->take(5)->values();
         $carouselPosts = $homePosts->slice(5, 6)->values();
+        $blogCategories = \App\Models\Bcategory::whereStatus(1)
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
-        return view('front.index', compact('recentPosts', 'carouselPosts'));
+        return view('front.index', compact('recentPosts', 'carouselPosts', 'blogCategories'));
+    }
+
+    public function homeBlogSearch(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+        $categoryId = $request->integer('category_id');
+
+        if ($search === '' && !$categoryId) {
+            return response()->json(['blogs' => []]);
+        }
+
+        $blogs = Post::with('category')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%');
+            })
+            ->when($categoryId, function ($query) use ($categoryId) {
+                $query->where('category_id', $categoryId);
+            })
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->take(10)
+            ->get()
+            ->map(function ($post) {
+                $photos = json_decode($post->photo, true);
+                $image = is_array($photos) && !empty($photos) ? reset($photos) : 'placeholder.png';
+
+                if (!$image || !file_exists(public_path('storage/images/' . $image))) {
+                    $image = 'placeholder.png';
+                }
+
+                return [
+                    'title' => $post->title,
+                    'url' => route('front.blog.details', $post->slug),
+                    'image' => url('/core/public/storage/images/' . $image),
+                    'date' => optional($post->created_at)->diffForHumans(),
+                    'category' => optional($post->category)->name ?: __('Blog'),
+                ];
+            })
+            ->values();
+
+        return response()->json(['blogs' => $blogs]);
     }
 
     /**

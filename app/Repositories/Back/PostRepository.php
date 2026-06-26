@@ -6,6 +6,7 @@ use App\{
     Models\Post,
     Helpers\ImageHelper
 };
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -26,7 +27,7 @@ class PostRepository
         if ($request->has('tags')) {
             $input['tags'] = str_replace(["value", "{", "}", "[", "]", ":", "\""], '', $request->tags);
         }
-        if ($request->photo) {
+        if ($request->hasFile('photo')) {
             $input['photo'] = json_encode($this->storeImageData($request), true);
         }
 
@@ -48,7 +49,7 @@ class PostRepository
         if ($request->has('tags')) {
             $input['tags'] = str_replace(["value", "{", "}", "[", "]", ":", "\""], '', $request->tags);
         }
-        if ($request->photo) {
+        if ($request->hasFile('photo')) {
             $input['photo'] = json_encode($this->UpdateImageData($request, $post), true);
         }
         $post->update($input);
@@ -58,27 +59,62 @@ class PostRepository
     public function storeImageData($request)
     {
 
-        $storeData = [];
-        if ($photos = $request->file('photo')) {
-            foreach ($photos as $key => $photo) {
-                $storeData[$key] = ImageHelper::handleUploadedImage($photo, 'images');
-            }
+        if ($photo = $request->file('photo')) {
+            return [$this->storeMainImage($photo)];
         }
-        return $storeData;
+
+        return [];
     }
 
     public function UpdateImageData($request, $post)
     {
 
-        $storeData = json_decode($post->photo, true);
+        $storeData = json_decode($post->photo, true) ?: [];
 
-        if ($photos = $request->file('photo')) {
-            foreach ($photos as $key => $photo) {
-                array_push($storeData, ImageHelper::handleUploadedImage($photo, 'images'));
+        if ($photo = $request->file('photo')) {
+            foreach ($storeData as $oldPhoto) {
+                Storage::delete("images" . '/' . $oldPhoto);
+                File::delete(public_path('storage/images/' . $oldPhoto));
             }
+
+            return [$this->storeMainImage($photo)];
         }
 
         return $storeData;
+    }
+
+    public function syncPublicImages($post)
+    {
+        $photos = json_decode($post->photo, true) ?: [];
+
+        foreach ($photos as $photo) {
+            $this->publishStoredImage($photo);
+        }
+    }
+
+    private function storeMainImage($photo)
+    {
+        $fileName = ImageHelper::handleUploadedImage($photo, 'images');
+        $this->publishStoredImage($fileName);
+
+        return $fileName;
+    }
+
+    private function publishStoredImage($fileName)
+    {
+        if (!$fileName) {
+            return;
+        }
+
+        $storedPath = storage_path('app/public/images/' . $fileName);
+        $publicPath = public_path('storage/images/' . $fileName);
+
+        if (File::exists($publicPath) || !File::exists($storedPath)) {
+            return;
+        }
+
+        File::ensureDirectoryExists(dirname($publicPath));
+        File::copy($storedPath, $publicPath);
     }
 
 
