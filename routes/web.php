@@ -238,6 +238,7 @@ Route::group(['middleware' => ['adminlocalize', 'demo']], function () {
 
             //   Home Page Customizations
             Route::get('home-page', 'Back\HomePageController@index')->name('back.homePage');
+            Route::post('home-page/update', 'Back\HomePageController@updateBanglaPokkhoHome')->name('back.homePage.update');
             Route::post('home-page/hero/banner/update', 'Back\HomePageController@hero_banner_update')->name('back.hero.banner.update');
             Route::post('home-page/first/banner/update', 'Back\HomePageController@first_banner_update')->name('back.first.banner.update');
             Route::post('home-page/secend/banner/update', 'Back\HomePageController@secend_banner_update')->name('back.secend.banner.update');

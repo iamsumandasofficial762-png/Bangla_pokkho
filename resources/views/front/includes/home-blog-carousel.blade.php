@@ -1,5 +1,5 @@
 @php
-    $fallbackAuthorName = $setting->title ?: 'সম্পাদকীয় দল';
+    $fallbackAuthorName = $setting->title ?: 'বাংলা পক্ষ';
     $fallbackAvatar = $setting->favicon ?: 'placeholder.png';
 
     if (!file_exists(public_path('storage/images/' . $fallbackAvatar))) {
@@ -12,18 +12,16 @@
         <div class="more-posts-panel">
             <div class="more-posts-heading">
                 <div>
-                    <span class="more-posts-eyebrow">ব্লগ থেকে</span>
-                    <h2 id="more-posts-title">আরও ব্লগ পোস্ট</h2>
-                    <p class="more-posts-subtitle">
-                        বাংলা পক্ষের অনুপ্রেরণামূলক গল্প, বাঙালি সংস্কৃতি, ইতিহাস, ঐতিহ্য এবং সমাজের খবর পড়ুন।
-                    </p>
+                    <span class="more-posts-eyebrow">{{ $carouselSection['label'] ?? 'ব্লগ থেকে' }}</span>
+                    <h2 id="more-posts-title">{{ $carouselSection['heading'] ?? 'আরও ব্লগ পোস্ট' }}</h2>
+                    <p class="more-posts-subtitle">{{ $carouselSection['description'] ?? '' }}</p>
                 </div>
-                <a class="more-posts-view-all" href="{{ route('front.blog') }}">
-                    সব পোস্ট দেখুন <span aria-hidden="true">&rarr;</span>
+                <a class="more-posts-view-all" href="{{ $carouselSection['view_all_url'] ?? route('front.blog') }}">
+                    {{ $carouselSection['view_all_text'] ?? 'সব পোস্ট দেখুন' }} <span aria-hidden="true">&rarr;</span>
                 </a>
             </div>
 
-            <div class="more-posts-carousel owl-carousel" aria-label="আরও ব্লগ পোস্ট">
+            <div class="more-posts-carousel owl-carousel" aria-label="{{ $carouselSection['heading'] ?? 'আরও ব্লগ পোস্ট' }}">
                 @foreach ($posts as $post)
                     @php
                         $photos = json_decode($post->photo, true);

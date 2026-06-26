@@ -1,1021 +1,401 @@
 @extends('master.back')
+
 @section('styles')
-    <link rel="stylesheet" href="{{asset('assets/back/css/select2.css')}}">
+    <link rel="stylesheet" href="{{ asset('assets/back/css/select2.css') }}">
+    <style>
+        .home-editor-nav .nav-link { border: 1px solid #e5e7eb; border-radius: 0; color: #343a40; margin-bottom: 0; padding: 14px 18px; text-align: center; }
+        .home-editor-nav .nav-link + .nav-link { border-top: 0; }
+        .home-editor-nav .nav-link.active { background: #377dff; border-color: #377dff; color: #fff; }
+        .home-editor-card { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 18px; padding: 18px; }
+        .home-editor-card h5 { font-weight: 700; margin-bottom: 16px; }
+        .home-editor-grid { display: grid; gap: 0; grid-template-columns: 1fr; }
+        .home-editor-panel { margin: 0 auto; max-width: 730px; }
+        .home-editor-panel .form-group { margin-bottom: 20px; }
+        .home-image-preview { background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 8px; display: inline-flex; min-height: 92px; min-width: 150px; overflow: hidden; }
+        .home-image-preview:empty { display: none; }
+        .home-image-preview img { display: block; height: 92px; object-fit: cover; width: 150px; }
+        .home-upload { border: 1px dashed rgba(219, 0, 0, .45); border-radius: 8px; padding: 12px; }
+        .home-upload-box { align-items: center; background: #fff; border: 1px dashed rgba(219, 0, 0, .45); border-radius: 8px; cursor: pointer; display: flex; gap: 14px; margin-top: 12px; min-height: 86px; padding: 16px; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
+        .home-upload-box:hover, .home-upload-box:focus-within, .home-upload-box.is-dragover { background: rgba(219, 0, 0, .035); border-color: #db0000; box-shadow: 0 0 0 4px rgba(219, 0, 0, .08); }
+        .home-upload-icon { align-items: center; background: rgba(219, 0, 0, .1); border-radius: 50%; color: #db0000; display: inline-flex; flex: 0 0 44px; height: 44px; justify-content: center; width: 44px; }
+        .home-upload-title { color: #1f2937; display: block; font-weight: 700; }
+        .home-upload-help, .home-upload-file { color: #6b7280; display: block; font-size: 12px; line-height: 1.5; }
+        .home-upload .home-image-input { height: 1px; opacity: 0; overflow: hidden; position: absolute; width: 1px; }
+        .home-repeat-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 14px; padding: 14px; }
+        .home-repeat-head { align-items: center; display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .home-toggle { align-items: center; display: flex; gap: 8px; margin-bottom: 18px; }
+        .home-editor-help { color: #6c757d; font-size: 12px; }
+        .home-editor-actions { border-top: 1px solid #e5e7eb; margin-top: 26px; padding-top: 24px; text-align: center; }
+        .home-editor-panel .select2-container--bootstrap .select2-selection {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            box-shadow: none;
+            min-height: 44px;
+            padding: 4px 8px;
+        }
+        .home-editor-panel .select2-container--bootstrap.select2-container--focus .select2-selection,
+        .home-editor-panel .select2-container--bootstrap.select2-container--open .select2-selection {
+            border-color: #377dff;
+            box-shadow: 0 0 0 3px rgba(55, 125, 255, .12);
+        }
+        .home-editor-panel .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+            background: #f8fafc;
+            border: 1px solid #dbe3ef;
+            border-radius: 999px;
+            color: #1f2937;
+            font-size: 12px;
+            margin: 4px 6px 4px 0;
+            padding: 5px 12px 5px 8px;
+        }
+        .home-editor-panel .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove {
+            align-items: center;
+            background: #e5e7eb;
+            border-radius: 50%;
+            color: #374151;
+            display: inline-flex;
+            font-size: 14px;
+            font-weight: 700;
+            height: 18px;
+            justify-content: center;
+            line-height: 1;
+            margin-right: 7px;
+            opacity: 1;
+            text-align: center;
+            width: 18px;
+        }
+        .home-editor-panel .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove:hover {
+            background: #db0000;
+            color: #fff;
+        }
+        .home-editor-panel .select2-container--bootstrap .select2-search--inline .select2-search__field {
+            margin-top: 7px;
+        }
+        @media (max-width: 767px) { .home-editor-nav { margin-bottom: 20px; } }
+    </style>
 @endsection
+
 @section('content')
+@php
+    $imageUrl = function ($image) {
+        return $image && file_exists(public_path('storage/images/' . $image))
+            ? url('/core/public/storage/images/' . $image)
+            : null;
+    };
+    $selected = fn ($ids, $id) => in_array($id, array_map('intval', (array) $ids)) ? 'selected' : '';
+@endphp
 
-<!-- Start of Main Content -->
 <div class="container-fluid">
-
-	<!-- Page Heading -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="d-sm-flex align-items-center justify-content-between">
-                <h3 class="mb-0 bc-title"><b>{{ __('Language') }}</b></h3>
-                </div>
+            <h3 class="mb-0 bc-title"><b>{{ __('Home Page') }}</b></h3>
         </div>
     </div>
 
-    {{-- Create Table Btn --}}
+    <form class="admin-form" action="{{ route('back.homePage.update') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @include('alerts.alerts')
 
-	<!-- DataTales -->
-	<div class="card shadow mb-4">
-		<div class="card-body">
-            <div class="row">
-                <div class="col-5 col-md-3">
-                    <div class="nav flex-column nav-pills nav-secondary" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                        <a class="nav-link active" id="v-pills-t9-tab" data-toggle="pill" href="#v-pills-t9" role="tab" aria-controls="v-pills-t9" aria-selected="true">{{ __('Hero Section Banner') }}</a>
-                        <a class="nav-link" id="v-pills-t1-tab" data-toggle="pill" href="#v-pills-t1" role="tab" aria-controls="v-pills-t1" aria-selected="false">{{ __('3 column banner First') }}</a>
-                        <a class="nav-link" id="v-pills-t2-tab" data-toggle="pill" href="#v-pills-t2" role="tab" aria-controls="v-pills-t2" aria-selected="false">{{ __('Popular Categories') }}</a>
-                        <a class="nav-link" id="v-pills-t5-tab" data-toggle="pill" href="#v-pills-t5" role="tab" aria-controls="v-pills-t5" aria-selected="false">{{ __('3 column banner Second') }}</a>
-                        <a class="nav-link" id="v-pills-t3-tab" data-toggle="pill" href="#v-pills-t3" role="tab" aria-controls="v-pills-t3" aria-selected="false">{{ __('Three column category') }}</a>
-                        <a class="nav-link" id="v-pills-t4-tab" data-toggle="pill" href="#v-pills-t4" role="tab" aria-controls="v-pills-t4" aria-selected="false">{{ __('Featured Categories') }}</a>
-                        <a class="nav-link" id="v-pills-t6-tab" data-toggle="pill" href="#v-pills-t6" role="tab" aria-controls="v-pills-t6" aria-selected="false">{{ __('2 column banner') }}</a>
-                        <a class="nav-link" id="v-pills-t7-tab" data-toggle="pill" href="#v-pills-t7" role="tab" aria-controls="v-pills-t7" aria-selected="false">{{ __('Home Page 4 Banner 5 Column') }}</a>
-                        <a class="nav-link" id="v-pills-t8-tab" data-toggle="pill" href="#v-pills-t8" role="tab" aria-controls="v-pills-t8" aria-selected="false">{{ __('Home Page 4 Popular Categories') }}</a>
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <div class="row justify-content-center">
+                    <div class="col-lg-3 col-md-4">
+                        <div class="nav flex-column nav-pills home-editor-nav" role="tablist">
+                            <a class="nav-link active" data-toggle="pill" href="#recent-blog">Recent Blog</a>
+                            <a class="nav-link" data-toggle="pill" href="#about-section">About Bangla Pokkho</a>
+                            <a class="nav-link" data-toggle="pill" href="#heritage-section">Heritage & Initiatives</a>
+                            <a class="nav-link" data-toggle="pill" href="#blog-carousel">Slider blogs</a>
+                            <a class="nav-link" data-toggle="pill" href="#faq-section">FAQ</a>
+                            <a class="nav-link" data-toggle="pill" href="#all-blog-section">Latest Posts</a>
+                        </div>
                     </div>
-                </div>
-                <div class="col-7 col-md-9">
-                    <div class="tab-content" id="v-pills-tabContent">
-                        <div class="tab-pane fade show active" id="v-pills-t9" role="tabpanel" aria-labelledby="v-pills-t9-tab">
-                            <form class="admin-form" action="{{route('back.hero.banner.update')}}"method="POST" enctype="multipart/form-data">
-                                @include('alerts.alerts')
-                                @csrf
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 1') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{isset($hero_banner['img1']) ? url('/core/public/storage/images/'.$hero_banner['img1']) : url('/core/public/storage/images/placeholder.png') }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img1" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
 
-                                        <div class="form-group">
-                                            <label for="title1">{{ __('Title') }} *</label>
-                                            <input type="text" name="title1" class="form-control" id="title1"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($hero_banner['title1']) ? $hero_banner['title1'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle1">{{ __('Subtitle') }} </label>
-                                            <input type="text" name="subtitle1" class="form-control" id="subtitle1"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($hero_banner['subtitle1']) ? $hero_banner['subtitle1'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="url1">{{ __('URL 1') }} *</label>
-                                            <input type="text" name="url1" class="form-control" id="url1"
-                                                placeholder="{{ __('Enter Url') }}"  value="{{isset($hero_banner['url1']) ? $hero_banner['url1'] : ''}}" >
-                                        </div>
-
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 2') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{isset($hero_banner['img2']) ? url('/core/public/storage/images/'.$hero_banner['img2']) : url('/core/public/storage/images/placeholder.png') }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img2" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="title2">{{ __('Title') }} *</label>
-                                            <input type="text" name="title2" class="form-control" id="title2"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($hero_banner['title2']) ? $hero_banner['title2'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle2">{{ __('Subtitle') }} </label>
-                                            <input type="text" name="subtitle2" class="form-control" id="subtitle2"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($hero_banner['subtitle2']) ? $hero_banner['subtitle2'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="url2">{{ __('URL 2') }} *</label>
-                                            <input type="text" name="url2" class="form-control" id="url2"
-                                                placeholder="{{ __('Enter Url') }}"  value="{{isset($hero_banner['url2']) ? $hero_banner['url2'] : ''}}" >
-                                        </div>
-
-
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-secondary ">{{ __('Submit') }}</button>
-                                    </div>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade show " id="v-pills-t1" role="tabpanel" aria-labelledby="v-pills-t1-tab">
-                            <form class="admin-form" action="{{route('back.first.banner.update')}}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 1') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{  url('/core/public/storage/images/'.$first_banner['img1']) }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img1" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="title1">{{ __('Title') }} *</label>
-                                            <input type="text" name="title1" class="form-control" id="title1"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($first_banner['title1']) ? $first_banner['title1'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle1">{{ __('Subtitle') }} *</label>
-                                            <input type="text" name="subtitle1" class="form-control" id="subtitle1"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($first_banner['subtitle1']) ? $first_banner['subtitle1'] : ''}}" >
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="url">{{ __('URL 1') }} *</label>
-                                            <input type="text" name="firsturl1" class="form-control" id="firsturl1"
-                                                placeholder="{{ __('Enter Banner Url') }}" value="{{$first_banner['firsturl1']}}" >
-                                        </div>
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 2') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{  url('/core/public/storage/images/'.$first_banner['img2']) }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img2" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="title2">{{ __('Title') }} *</label>
-                                            <input type="text" name="title2" class="form-control" id="title2"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($first_banner['title2']) ? $first_banner['title2'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle2">{{ __('Subtitle') }} *</label>
-                                            <input type="text" name="subtitle2" class="form-control" id="subtitle2"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($first_banner['subtitle2']) ? $first_banner['subtitle2'] : ''}}" >
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="firsturl2">{{ __('URL 2') }} *</label>
-                                            <input type="text" name="firsturl2" class="form-control" id="firsturl2"
-                                                placeholder="{{ __('Enter Banner Url') }}" value="{{$first_banner['firsturl2']}}" >
-                                        </div>
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 3') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{  url('/core/public/storage/images/'.$first_banner['img3']) }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img3" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="title3">{{ __('Title') }} *</label>
-                                            <input type="text" name="title3" class="form-control" id="title3"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($first_banner['title3']) ? $first_banner['title3'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle3">{{ __('Subtitle') }} *</label>
-                                            <input type="text" name="subtitle3" class="form-control" id="subtitle3"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($first_banner['subtitle3']) ? $first_banner['subtitle3'] : ''}}" >
-                                        </div>
-
-
-                                        <div class="form-group">
-                                            <label for="firsturl3">{{ __('URL 3') }} *</label>
-                                            <input type="text" name="firsturl3" class="form-control" id="firsturl3"
-                                                placeholder="{{ __('Enter Banner Url') }}" value="{{$first_banner['firsturl3']}}" >
-                                        </div>
-
-                                    <div class="form-group">
-                                            <button type="submit" class="btn btn-secondary ">{{ __('Submit') }}</button>
+                    <div class="col-lg-7 col-md-8">
+                        <div class="tab-content home-editor-panel">
+                            <div class="tab-pane fade show active" id="recent-blog">
+                                @php $section = $sections['recent_blog']; @endphp
+                                <div class="home-toggle">
+                                    <input type="checkbox" name="sections[recent_blog][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}>
+                                    <strong>Enable Section</strong>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade" id="v-pills-t2" role="tabpanel" aria-labelledby="v-pills-t2-tab">
-
-                            <form class="admin-form" action="{{route('back.popular.category.update')}}" method="POST">
-                                @csrf
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[recent_blog][label]" value="{{ $section['label'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[recent_blog][heading]" value="{{ $section['heading'] ?? '' }}"></div>
+                                    <div class="form-group"><label>View All Text</label><input class="form-control" name="sections[recent_blog][view_all_text]" value="{{ $section['view_all_text'] ?? '' }}"></div>
+                                </div>
+                                <div class="home-editor-grid">
                                     <div class="form-group">
-                                        <label for="popular_title">{{ __('Section Title') }} *</label>
-                                        <input type="text" name="popular_title" class="form-control" id="popular_title"
-                                            placeholder="{{ __('Popular Category') }}" value="{{$popular_category['popular_title']}}" >
-                                    </div>
-                                    <hr>
-                                    <h2 class=""><b>{{ __('Category 1 :') }}</b></h2>
-
-                                    <div class="form-group">
-                                        <label for="category_id1">{{ __('Select Category') }} *</label>
-                                        <select name="category_id1"  id="category_id1" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                            <option value="" >{{__('Select One')}}</option>
-                                            @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                            <option value="{{ $cat->id }}" {{$cat->id == $popular_category['category_id1'] ? 'selected' : ''}} >{{ $cat->name }}</option>
-                                            @endforeach
+                                        <label>Post Mode</label>
+                                        <select class="form-control" name="sections[recent_blog][post_mode]">
+                                            <option value="latest" {{ ($section['post_mode'] ?? '') === 'latest' ? 'selected' : '' }}>Latest automatically</option>
+                                            <option value="manual" {{ ($section['post_mode'] ?? '') === 'manual' ? 'selected' : '' }}>Manual selected posts</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="subcategory_id1">{{ __('Select Sub Category') }} </label>
-                                        <select name="subcategory_id1" id="subcategory_id1" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                            <option value="">{{__('Select one')}}</option>
-                                            @foreach(DB::table('subcategories')->where('category_id',$popular_category['category_id1'])->whereStatus(1)->get() as $subcat)
-                                            <option value="{{ $subcat->id }}" {{ $subcat->id == $popular_category['subcategory_id1']? 'selected' : '' }}>{{ $subcat->name }}</option>
+                                        <label>Large Featured Post</label>
+                                        <select class="form-control select2" name="sections[recent_blog][featured_post_id]">
+                                            <option value="">Latest first post</option>
+                                            @foreach($posts as $post)
+                                                <option value="{{ $post->id }}" {{ (int)($section['featured_post_id'] ?? 0) === $post->id ? 'selected' : '' }}>{{ $post->title }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-
-                                    <div class="form-group">
-                                        <label for="childcategory_id1">{{ __('Select Child Category') }} </label>
-                                        <select name="childcategory_id1" id="childcategory_id1" class="form-control">
-                                            <option value="">{{__('Select one')}}</option>
-                                            @foreach(DB::table('chield_categories')->where('category_id',$popular_category['category_id1'])->whereStatus(1)->get() as $chieldcategory)
-                                            <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $popular_category['childcategory_id1'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <hr>
-                                    <h2 class=""><b>{{ __('Category 2 :') }}</b></h2>
-                                    <div class="form-group">
-                                        <label for="category_id2">{{ __('Select Category') }} *</label>
-                                        <select name="category_id2" id="category_id2" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                            <option value="" >{{__('Select One')}}</option>
-                                            @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                            <option value="{{ $cat->id }}" {{$cat->id == $popular_category['category_id2'] ? 'selected' : ''}}>{{ $cat->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="subcategory_id2">{{ __('Select Sub Category') }} </label>
-                                        <select name="subcategory_id2" id="subcategory_id2" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                            <option value="">{{__('Select one')}}</option>
-                                            @foreach(DB::table('subcategories')->where('category_id',$popular_category['category_id2'])->whereStatus(1)->get() as $subcat)
-                                            <option value="{{ $subcat->id }}" {{ $subcat->id == $popular_category['subcategory_id2']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="childcategory_id2">{{ __('Select Child Category') }} </label>
-                                        <select name="childcategory_id2" id="childcategory_id2" class="form-control">
-                                            <option value="">{{__('Select one')}}</option>
-                                            @foreach(DB::table('chield_categories')->where('category_id',$popular_category['category_id2'])->whereStatus(1)->get() as $chieldcategory)
-                                            <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $popular_category['childcategory_id2'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <hr>
-                                    <h2 class=""><b>{{ __('Category 3 :') }}</b></h2>
-                                    <div class="form-group">
-                                        <label for="category_id3">{{ __('Select Category') }} *</label>
-                                        <select name="category_id3" id="category_id3" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                            <option value="" >{{__('Select One')}}</option>
-                                            @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                            <option value="{{ $cat->id }}" {{$cat->id == $popular_category['category_id3'] ? 'selected' : ''}} >{{ $cat->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="subcategory_id3">{{ __('Select Sub Category') }} </label>
-                                        <select name="subcategory_id3" id="subcategory_id3" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                            <option value="">{{__('Select one')}}</option>
-                                            @foreach(DB::table('subcategories')->where('category_id',$popular_category['category_id3'])->whereStatus(1)->get() as $subcat)
-                                            <option value="{{ $subcat->id }}" {{ $subcat->id == $popular_category['subcategory_id3']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="childcategory_id3">{{ __('Select Child Category') }} </label>
-                                        <select name="childcategory_id3" id="childcategory_id3" class="form-control">
-                                            <option value="">{{__('Select one')}}</option>
-                                            @foreach(DB::table('chield_categories')->where('category_id',$popular_category['category_id3'])->whereStatus(1)->get() as $chieldcategory)
-                                            <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $popular_category['childcategory_id3'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <hr>
-                                    <h2 class=""><b>{{ __('Category 4 :') }}</b></h2>
-                                    <div class="form-group">
-                                        <label for="category_id4">{{ __('Select Category') }} *</label>
-                                        <select name="category_id4" id="category_id4" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                            <option value="" >{{__('Select One')}}</option>
-                                            @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                            <option value="{{ $cat->id }}" {{$cat->id == $popular_category['category_id4'] ? 'selected' : ''}}>{{ $cat->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="subcategory_id4">{{ __('Select Sub Category') }} </label>
-                                        <select name="subcategory_id4" id="subcategory_id4" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                            <option value="">{{__('Select one')}}</option>
-                                            @foreach(DB::table('subcategories')->where('category_id',$popular_category['category_id4'])->whereStatus(1)->get() as $subcat)
-                                            <option value="{{ $subcat->id }}" {{ $subcat->id == $popular_category['subcategory_id4']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="childcategory_id4">{{ __('Select Child Category') }} </label>
-                                        <select name="childcategory_id4" id="childcategory_id4" class="form-control">
-                                            <option value="">{{__('Select one')}}</option>
-                                            @foreach(DB::table('chield_categories')->where('category_id',$popular_category['category_id4'])->whereStatus(1)->get() as $chieldcategory)
-                                            <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $popular_category['childcategory_id4'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-
+                                </div>
                                 <div class="form-group">
-                                <button type="submit" class="btn btn-secondary ">{{ __('Submit') }}</button>
+                                    <label>Small Post Selection</label>
+                                    <select class="form-control select2" name="sections[recent_blog][post_ids][]" multiple>
+                                        @foreach($posts as $post)
+                                            <option value="{{ $post->id }}" {!! $selected($section['post_ids'] ?? [], $post->id) !!}>{{ $post->title }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span class="home-editor-help">Leave empty to show the latest posts.</span>
+                                </div>
                             </div>
-                        </form>
-                        </div>
 
-                        <div class="tab-pane fade" id="v-pills-t5" role="tabpanel" aria-labelledby="v-pills-t5-tab">
-                            <form class="admin-form" action="{{route('back.secend.banner.update')}}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 1') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{  url('/core/public/storage/images/'.$secend_banner['img1']) }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img1" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="title1">{{ __('Title') }} *</label>
-                                            <input type="text" name="title1" class="form-control" id="title1"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($secend_banner['title1']) ? $secend_banner['title1'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle1">{{ __('Subtitle') }} *</label>
-                                            <input type="text" name="subtitle1" class="form-control" id="subtitle1"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($secend_banner['subtitle1']) ? $secend_banner['subtitle1'] : ''}}" >
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="url">{{ __('URL 1') }} *</label>
-                                            <input type="text" name="url1" class="form-control" id="url1"
-                                                placeholder="{{ __('Enter Banner Url') }}" value="{{$secend_banner['url1']}}" >
-                                        </div>
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 2') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{  url('/core/public/storage/images/'.$secend_banner['img2']) }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img2" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="title2">{{ __('Title') }} *</label>
-                                            <input type="text" name="title2" class="form-control" id="title2"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($secend_banner['title2']) ? $secend_banner['title2'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle2">{{ __('Subtitle') }} *</label>
-                                            <input type="text" name="subtitle2" class="form-control" id="subtitle2"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($secend_banner['subtitle2']) ? $secend_banner['subtitle2'] : ''}}" >
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="url">{{ __('URL 2') }} *</label>
-                                            <input type="text" name="url2" class="form-control" id="url2"
-                                                placeholder="{{ __('Enter Banner Url') }}" value="{{$secend_banner['url2']}}" >
-                                        </div>
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 3') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{  url('/core/public/storage/images/'.$secend_banner['img3']) }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img3" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="title3">{{ __('Title') }} *</label>
-                                            <input type="text" name="title3" class="form-control" id="title3"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($secend_banner['title3']) ? $secend_banner['title3'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle3">{{ __('Subtitle') }} *</label>
-                                            <input type="text" name="subtitle3" class="form-control" id="subtitle3"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($secend_banner['subtitle3']) ? $secend_banner['subtitle3'] : ''}}" >
-                                        </div>
-
-
-                                        <div class="form-group">
-                                            <label for="url">{{ __('URL 3') }} *</label>
-                                            <input type="text" name="url3" class="form-control" id="url3"
-                                                placeholder="{{ __('Enter Banner Url') }}" value="{{$secend_banner['url3']}}" >
-                                        </div>
-
-                                    <div class="form-group">
-                                            <button type="submit" class="btn btn-secondary ">{{ __('Submit') }}</button>
+                            <div class="tab-pane fade" id="about-section">
+                                @php $section = $sections['about_section']; @endphp
+                                <div class="home-toggle"><input type="checkbox" name="sections[about_section][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>Subtitle</label><input class="form-control" name="sections[about_section][subtitle]" value="{{ $section['subtitle'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[about_section][heading]" value="{{ $section['heading'] ?? '' }}"></div>
                                 </div>
-                            </form>
-                        </div>
-
-                        <div class="tab-pane fade" id="v-pills-t3" role="tabpanel" aria-labelledby="v-pills-t3-tab">
-                            <form class="admin-form" action="{{route('back.tree.column.category.update')}}" method="POST">
-                                @csrf
-                                <hr>
-                                <h2 class=""><b>{{ __('Category 1 :') }}</b></h2>
-
-                                <div class="form-group">
-                                    <label for="column_category_id1">{{ __('Select Category') }} *</label>
-                                    <select name="category_id1" id="column_category_id1" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                        <option value="" >{{__('Select One')}}</option>
-                                        @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                        <option value="{{ $cat->id }}" {{$cat->id == $three_column_category['category_id1'] ? 'selected' : ''}} >{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="cloumn_subcategory_id2">{{ __('Select Sub Category') }} </label>
-                                    <select name="subcategory_id1" id="cloumn_subcategory_id1" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('subcategories')->where('category_id',$three_column_category['category_id1'])->whereStatus(1)->get() as $subcat)
-                                        <option value="{{ $subcat->id }}" {{ $subcat->id == $three_column_category['subcategory_id1']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="cloumn_childcategory_id1">{{ __('Select Child Category') }} </label>
-                                    <select name="childcategory_id1"  id="cloumn_childcategory_id1" class="form-control">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('chield_categories')->where('category_id',$three_column_category['category_id1'])->whereStatus(1)->get() as $chieldcategory)
-                                        <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $three_column_category['childcategory_id1'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <hr>
-                                <h2 class=""><b>{{ __('Category 2 :') }}</b></h2>
-                                <div class="form-group">
-                                    <label for="column_category_id2">{{ __('Select Category') }} *</label>
-                                    <select name="category_id2" id="column_category_id2" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                        <option value="" >{{__('Select One')}}</option>
-                                        @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                        <option value="{{ $cat->id }}" {{$cat->id == $three_column_category['category_id2'] ? 'selected' : ''}}>{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="cloumn_subcategory_id2">{{ __('Select Sub Category') }} </label>
-                                    <select name="subcategory_id2" id="cloumn_subcategory_id2" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('subcategories')->where('category_id',$three_column_category['category_id2'])->whereStatus(1)->get() as $subcat)
-                                        <option value="{{ $subcat->id }}" {{ $subcat->id == $three_column_category['subcategory_id2']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="cloumn_childcategory_id2">{{ __('Select Child Category') }} </label>
-                                    <select name="childcategory_id2" id="cloumn_childcategory_id2" class="form-control">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('chield_categories')->where('category_id',$three_column_category['category_id2'])->whereStatus(1)->get() as $chieldcategory)
-                                        <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $three_column_category['childcategory_id2'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <hr>
-                                <h2 class=""><b>{{ __('Category 3 :') }}</b></h2>
-                                <div class="form-group">
-                                    <label for="column_category_id3">{{ __('Select Category') }} *</label>
-                                    <select name="category_id3" id="column_category_id3" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                        <option value="" >{{__('Select One')}}</option>
-                                        @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                        <option value="{{ $cat->id }}" {{ isset($three_column_category['category_id3']) && $cat->id == $three_column_category['category_id3'] ? 'selected' : ''}}>{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="cloumn_subcategory_id3">{{ __('Select Sub Category') }} </label>
-                                    <select name="subcategory_id3" id="cloumn_subcategory_id3" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @php
-                                            if(isset($three_column_category['category_id3'])){
-                                                $subcategory = DB::table('subcategories')->where('category_id', $three_column_category['category_id3'])->whereStatus(1)->get();
-                                            }else{
-                                                $subcategory = DB::table('subcategories')->whereStatus(1)->get();
-                                            }
-                                        @endphp
-                                        @foreach($subcategory as $subcat)
-                                        <option value="{{ $subcat->id }}" {{ isset($three_column_category['category_id3']) &&  $subcat->id == $three_column_category['subcategory_id3']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="cloumn_childcategory_id3">{{ __('Select Child Category') }} </label>
-                                    <select name="childcategory_id3" id="cloumn_childcategory_id3" class="form-control">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @php
-                                            if(isset($three_column_category['category_id3'])){
-                                                $childcategory = DB::table('chield_categories')->where('category_id',$three_column_category['category_id3'])->whereStatus(1)->get();
-                                            }else{
-                                                $childcategory = DB::table('chield_categories')->whereStatus(1)->get();
-                                            }
-                                        @endphp
-                                        @foreach($childcategory as $chieldcategory)
-                                        <option value="{{ $chieldcategory->id }}" {{isset($three_column_category['category_id3']) &&  $chieldcategory->id == $three_column_category['childcategory_id3'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-
-
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-secondary ">{{ __('Submit') }}</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="tab-pane fade" id="v-pills-t4" role="tabpanel" aria-labelledby="v-pills-t4-tab">
-                            <form class="admin-form" action="{{route('back.feature.category.update')}}" method="POST">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="feature_title">{{ __('Section Title') }} *</label>
-                                    <input type="text" name="feature_title" class="form-control" id="feature_title"
-                                        placeholder="{{ __('Feture Category') }}" value="{{$feature_category['feature_title']}}" >
-                                </div>
-                                <hr>
-                                <h2 class=""><b>{{ __('Category 1 :') }}</b></h2>
-
-                                <div class="form-group">
-                                    <label for="feature_category_id1">{{ __('Select Category') }} *</label>
-                                    <select name="category_id1" id="feature_category_id1" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                        <option value="" >{{__('Select One')}}</option>
-                                        @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                        <option value="{{ $cat->id }}" {{$cat->id == $feature_category['category_id1'] ? 'selected' : ''}} >{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="feature_subcategory_id1">{{ __('Select Sub Category') }} </label>
-                                    <select name="subcategory_id1" id="feature_subcategory_id1" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('subcategories')->where('category_id',$feature_category['category_id1'])->whereStatus(1)->get() as $subcat)
-                                        <option value="{{ $subcat->id }}" {{ $subcat->id == $feature_category['subcategory_id1']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="feature_childcategory_id1">{{ __('Select Child Category') }} </label>
-                                    <select name="childcategory_id1" id="feature_childcategory_id1" class="form-control">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('chield_categories')->where('category_id',$feature_category['category_id1'])->whereStatus(1)->get() as $chieldcategory)
-                                        <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $feature_category['childcategory_id1'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <hr>
-                                <h2 class=""><b>{{ __('Category 2 :') }}</b></h2>
-                                <div class="form-group">
-                                    <label for="feature_category_id2">{{ __('Select Category') }} *</label>
-                                    <select name="category_id2" id="feature_category_id2" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                        <option value="" >{{__('Select One')}}</option>
-                                        @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                        <option value="{{ $cat->id }}" {{$cat->id == $feature_category['category_id2'] ? 'selected' : ''}}>{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="feature_subcategory_id2">{{ __('Select Sub Category') }} </label>
-                                    <select name="subcategory_id2" id="feature_subcategory_id2" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('subcategories')->where('category_id',$feature_category['category_id2'])->whereStatus(1)->get() as $subcat)
-                                        <option value="{{ $subcat->id }}" {{ $subcat->id == $feature_category['subcategory_id2']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="feature_childcategory_id2">{{ __('Select Child Category') }} </label>
-                                    <select name="childcategory_id2" id="feature_childcategory_id2" class="form-control">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('chield_categories')->where('category_id',$feature_category['category_id2'])->whereStatus(1)->get() as $chieldcategory)
-                                        <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $feature_category['childcategory_id2'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <hr>
-                                <h2 class=""><b>{{ __('Category 3 :') }}</b></h2>
-                                <div class="form-group">
-                                    <label for="feature_category_id3">{{ __('Select Category') }} *</label>
-                                    <select name="category_id3" id="feature_category_id3" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                        <option value="" >{{__('Select One')}}</option>
-                                        @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                        <option value="{{ $cat->id }}" {{$cat->id == $feature_category['category_id3'] ? 'selected' : ''}} >{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="feature_subcategory_id3">{{ __('Select Sub Category') }} </label>
-                                    <select name="subcategory_id3" id="feature_subcategory_id3" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('subcategories')->where('category_id',$feature_category['category_id3'])->whereStatus(1)->get() as $subcat)
-                                        <option value="{{ $subcat->id }}" {{ $subcat->id == $feature_category['subcategory_id3']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="feature_childcategory_id3">{{ __('Select Child Category') }} </label>
-                                    <select name="childcategory_id3" id="feature_childcategory_id3" class="form-control">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('chield_categories')->where('category_id',$feature_category['category_id3'])->whereStatus(1)->get() as $chieldcategory)
-                                        <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $feature_category['childcategory_id3'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <hr>
-                                <h2 class=""><b>{{ __('Category 4 :') }}</b></h2>
-                                <div class="form-group">
-                                    <label for="feature_category_id4">{{ __('Select Category') }} *</label>
-                                    <select name="category_id4" id="feature_category_id4" data-href="{{route('back.get.subcategory')}}" class="form-control" >
-                                        <option value="" >{{__('Select One')}}</option>
-                                        @foreach(DB::table('categories')->whereStatus(1)->get() as $cat)
-                                        <option value="{{ $cat->id }}" {{$cat->id == $feature_category['category_id4'] ? 'selected' : ''}}>{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="feature_subcategory_id4">{{ __('Select Sub Category') }} </label>
-                                    <select name="subcategory_id4" id="feature_subcategory_id4" class="form-control" data-href="{{route('back.get.childcategory')}}">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('subcategories')->where('category_id',$feature_category['category_id4'])->whereStatus(1)->get() as $subcat)
-                                        <option value="{{ $subcat->id }}" {{ $subcat->id == $feature_category['subcategory_id4']? 'selected' : '' }}>{{ $subcat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="feature_childcategory_id4">{{ __('Select Child Category') }} </label>
-                                    <select name="childcategory_id4" id="feature_childcategory_id4" class="form-control">
-                                        <option value="">{{__('Select one')}}</option>
-                                        @foreach(DB::table('chield_categories')->where('category_id',$feature_category['category_id4'])->whereStatus(1)->get() as $chieldcategory)
-                                        <option value="{{ $chieldcategory->id }}" {{ $chieldcategory->id == $feature_category['childcategory_id4'] ? 'selected' : '' }}>{{ $chieldcategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-
-
-                                <div class="form-group">
-                                        <button type="submit" class="btn btn-secondary ">{{ __('Submit') }}</button>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade" id="v-pills-t6" role="tabpanel" aria-labelledby="v-pills-t6-tab">
-                            <form class="admin-form" action="{{route('back.third.banner.update')}}"
-
-                                method="post" enctype="multipart/form-data">
-                                @csrf
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 1') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{  url('/core/public/storage/images/'.$third_banner['img1']) }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
+                                <div class="form-group"><label>Description</label><textarea class="form-control" rows="4" name="sections[about_section][description]">{{ $section['description'] ?? '' }}</textarea></div>
+                                <div class="home-editor-grid">
+                                    @foreach(['main_image' => 'Main Image', 'decorative_image' => 'Decorative Image'] as $field => $label)
+                                        <div class="form-group home-upload">
+                                            <label>{{ $label }}</label><br>
+                                            <span class="home-image-preview">@if($imageUrl($section[$field] ?? null))<img src="{{ $imageUrl($section[$field]) }}" data-preview-target="{{ $field }}">@endif</span>
+                                            <input type="file" class="form-control-file mt-2 home-image-input" name="images[about_section][{{ $field }}]" accept="image/jpeg,image/png,image/webp">
                                         </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img1" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="title1">{{ __('Title') }} *</label>
-                                            <input type="text" name="title1" class="form-control" id="title1"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($third_banner['title1']) ? $third_banner['title1'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle1">{{ __('Subtitle') }} *</label>
-                                            <input type="text" name="subtitle1" class="form-control" id="subtitle1"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($third_banner['subtitle1']) ? $third_banner['subtitle1'] : ''}}" >
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="url">{{ __('URL 1') }} *</label>
-                                            <input type="text" name="url1" class="form-control" id="url1"
-                                                placeholder="{{ __('Enter Banner Url') }}" value="{{$third_banner['url1']}}" >
-                                        </div>
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Image 2') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{  url('/core/public/storage/images/'.$third_banner['img2']) }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img2" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="title2">{{ __('Title') }} *</label>
-                                            <input type="text" name="title2" class="form-control" id="title2"
-                                                placeholder="{{ __('Enter Title') }}"  value="{{isset($third_banner['title2']) ? $third_banner['title2'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="subtitle2">{{ __('Subtitle') }} *</label>
-                                            <input type="text" name="subtitle2" class="form-control" id="subtitle2"
-                                                placeholder="{{ __('Enter Subtitle') }}"  value="{{isset($third_banner['subtitle2']) ? $third_banner['subtitle2'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="url">{{ __('URL 2') }} *</label>
-                                            <input type="text" name="url2" class="form-control" id="url2"
-                                                placeholder="{{ __('Enter Banner Url') }}" value="{{$third_banner['url2']}}" >
-                                        </div>
-
-                                    <div class="form-group">
-                                            <button type="submit"
-                                                class="btn btn-secondary ">{{ __('Submit') }}</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="tab-pane fade" id="v-pills-t7" role="tabpanel" aria-labelledby="v-pills-t7-tab">
-                            <form class="admin-form" action="{{route('back.home_page4.banner.update')}}"method="POST" enctype="multipart/form-data">
-                                @include('alerts.alerts')
-                                @csrf
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Banner 1 Image') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{ isset($home4_banner['img1']) ?  url('/core/public/storage/images/'.$home4_banner['img1']) : url('/core/public/storage/images/placeholder.png') }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img1" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="label1">{{ __('Banner 1 Button Text') }} *</label>
-                                            <input type="text" name="label1" class="form-control" id="label1"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['label1']) ? $home4_banner['label1'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="url1">{{ __('Banner 1 Button Link') }} *</label>
-                                            <input type="text" name="url1" class="form-control" id="url1"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['url1']) ? $home4_banner['url1']: ''}}" >
-                                        </div>
-
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Banner 2 Image') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{ isset($home4_banner['img2']) ?  url('/core/public/storage/images/'.$home4_banner['img2']) : url('/core/public/storage/images/placeholder.png') }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img2" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="label2">{{ __('Banner 2 Button Text') }} *</label>
-                                            <input type="text" name="label2" class="form-control" id="label2"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['label2']) ? $home4_banner['label2'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="url2">{{ __('Banner 2 Button Link') }} *</label>
-                                            <input type="text" name="url2" class="form-control" id="url2"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['url2']) ? $home4_banner['url2'] : ''}}" >
-                                        </div>
-
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Banner 3 Image') }} * <small>({{ __('Middle Big Image') }})</small></label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{ isset($home4_banner['img3']) ?  url('/core/public/storage/images/'.$home4_banner['img3']) : url('/core/public/storage/images/placeholder.png') }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img3" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="label3">{{ __('Banner 3 Button Text') }} *</label>
-                                            <input type="text" name="label3" class="form-control" id="label3"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['label3']) ? $home4_banner['label3'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="url3">{{ __('Banner 3 Button Link') }} *</label>
-                                            <input type="text" name="url3" class="form-control" id="url3"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['url3']) ? $home4_banner['url3'] : ''}}" >
-                                        </div>
-
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Banner 4 Image') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{ isset($home4_banner['img4']) ?  url('/core/public/storage/images/'.$home4_banner['img4']) : url('/core/public/storage/images/placeholder.png') }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img4" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="label4">{{ __('Banner 4 Button Text') }} *</label>
-                                            <input type="text" name="label4" class="form-control" id="label4"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['label4']) ? $home4_banner['label4'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="url4">{{ __('Banner 4 Button Link') }} *</label>
-                                            <input type="text" name="url4" class="form-control" id="url4"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['url4']) ? $home4_banner['url4'] : ''}}" >
-                                        </div>
-
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label for="name">{{ __('Banner 5 Image') }} *</label>
-                                            <br>
-                                                <img class="admin-img"
-                                                    src="{{ isset($home4_banner['img5']) ?  url('/core/public/storage/images/'.$home4_banner['img5']) : url('/core/public/storage/images/placeholder.png') }}"
-                                                    alt="No Image Found">
-                                            <br>
-                                            <span class="mt-1">{{ __('Image Size Should Be 496 x 204.') }}</span>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <label class="file">
-                                                <input type="file"  accept="image/*"  class="upload-photo" name="img5" id="file"
-                                                    aria-label="File browser example">
-                                                <span class="file-custom text-left">{{ __('Upload Image...') }}</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="label5">{{ __('Banner 5 Button Text') }} *</label>
-                                            <input type="text" name="label5" class="form-control" id="label5"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['label5']) ? $home4_banner['label5'] : ''}}" >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="url5">{{ __('Banner 5 Button Link') }} *</label>
-                                            <input type="text" name="url5" class="form-control" id="url5"
-                                                placeholder="{{ __('Enter Banner Url') }}"  value="{{isset($home4_banner['url5']) ? $home4_banner['url5'] : ''}}" >
-                                        </div>
-
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-secondary ">{{ __('Submit') }}</button>
-                                    </div>
-                            </form>
-                        </div>
-                        <div class="tab-pane fade" id="v-pills-t8" role="tabpanel" aria-labelledby="v-pills-t8-tab">
-                            <form class="admin-form" action="{{route('back.home4.category.update')}}"
-                                method="post" enctype="multipart/form-data">
-                                @csrf
-                                @php
-                                    if(isset($home_4_popular_category)){
-                                        $home_4_popular_category = $home_4_popular_category;
-                                    }else{
-                                        $home_4_popular_category = [];
-                                    }
-                                @endphp
-                                <label for="basic">{{ __('Select Sub Category') }} </label>
-                                <select name="home_4_popular_category[]" id="basic" class="form-control" multiple data-href="{{route('back.get.childcategory')}}">
-                                    @foreach(DB::table('categories')->whereStatus(1)->get() as $category)
-                                    <option value="{{ $category->id }}" {{ in_array($category->id,$home_4_popular_category) ? 'selected' : '' }}>{{ $category->name }}</option>
                                     @endforeach
-                                </select>
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-secondary ">{{ __('Submit') }}</button>
-                        </div>
-                    </form>
+                                </div>
+                                <h5>Tabs</h5>
+                                @foreach(($section['tabs'] ?? []) as $index => $tab)
+                                    <div class="home-repeat-item">
+                                        <input type="hidden" name="sections[about_section][tabs][{{ $index }}][key]" value="{{ $tab['key'] ?? 'tab' . $index }}">
+                                        <div class="home-editor-grid">
+                                            <div class="form-group"><label>Tab Name</label><input class="form-control" name="sections[about_section][tabs][{{ $index }}][name]" value="{{ $tab['name'] ?? '' }}"></div>
+                                            <div class="form-group"><label>Title</label><input class="form-control" name="sections[about_section][tabs][{{ $index }}][title]" value="{{ $tab['title'] ?? '' }}"></div>
+                                        </div>
+                                        <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[about_section][tabs][{{ $index }}][description]">{{ $tab['description'] ?? '' }}</textarea></div>
+                                        <div class="form-group"><label>Bullet points, one per line</label><textarea class="form-control" rows="3" name="sections[about_section][tabs][{{ $index }}][bullets]">{{ implode("\n", $tab['bullets'] ?? []) }}</textarea></div>
+                                        <div class="form-group home-upload">
+                                            <label>Tab Image/Icon</label><br>
+                                            <span class="home-image-preview">@if($imageUrl($tab['image'] ?? null))<img src="{{ $imageUrl($tab['image']) }}">@endif</span>
+                                            <input type="file" class="form-control-file mt-2 home-image-input" name="images[about_section][tabs][{{ $index }}][image]" accept="image/jpeg,image/png,image/webp">
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
 
+                            <div class="tab-pane fade" id="heritage-section">
+                                @php $section = $sections['heritage_cards']; @endphp
+                                <div class="home-toggle"><input type="checkbox" name="sections[heritage_cards][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[heritage_cards][label]" value="{{ $section['label'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[heritage_cards][heading]" value="{{ $section['heading'] ?? '' }}"></div>
+                                </div>
+                                <div class="form-group"><label>Description</label><textarea class="form-control" rows="3" name="sections[heritage_cards][description]">{{ $section['description'] ?? '' }}</textarea></div>
+                                <h5>Cards</h5>
+                                <div data-repeater="heritage-cards">
+                                    <div class="home-repeat-list">
+                                @foreach(($section['cards'] ?? []) as $index => $card)
+                                    <div class="home-repeat-item">
+                                        <div class="home-repeat-head"><strong>Card {{ $index + 1 }}</strong></div>
+                                        <div class="home-editor-grid">
+                                            <div class="form-group"><label>Title</label><input class="form-control" name="sections[heritage_cards][cards][{{ $index }}][title]" value="{{ $card['title'] ?? '' }}"></div>
+                                            <div class="form-group"><label>Icon class</label><input class="form-control" name="sections[heritage_cards][cards][{{ $index }}][icon]" value="{{ $card['icon'] ?? '' }}"></div>
+                                            <div class="form-group"><label>Button Text</label><input class="form-control" name="sections[heritage_cards][cards][{{ $index }}][button_text]" value="{{ $card['button_text'] ?? '' }}"></div>
+                                        </div>
+                                        <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[heritage_cards][cards][{{ $index }}][description]">{{ $card['description'] ?? '' }}</textarea></div>
+                                        <div class="form-group home-upload"><label>Image</label><br><span class="home-image-preview">@if($imageUrl($card['image'] ?? null))<img src="{{ $imageUrl($card['image']) }}">@endif</span><input type="file" class="form-control-file mt-2 home-image-input" name="images[heritage_cards][cards][{{ $index }}][image]" accept="image/jpeg,image/png,image/webp"></div>
+                                    </div>
+                                @endforeach
+                                    </div>
+                                </div>
+                                <h5>Bottom Feature Strip</h5>
+                                <div data-repeater="heritage-features">
+                                    <div class="home-repeat-list">
+                                @foreach(($section['features'] ?? []) as $index => $feature)
+                                    <div class="home-repeat-item">
+                                        <div class="home-repeat-head"><strong>Feature</strong></div>
+                                        <div class="home-editor-grid">
+                                            <div class="form-group"><label>Icon class</label><input class="form-control" name="sections[heritage_cards][features][{{ $index }}][icon]" value="{{ $feature['icon'] ?? '' }}"></div>
+                                            <div class="form-group"><label>Title</label><input class="form-control" name="sections[heritage_cards][features][{{ $index }}][title]" value="{{ $feature['title'] ?? '' }}"></div>
+                                            <div class="form-group"><label>Description</label><input class="form-control" name="sections[heritage_cards][features][{{ $index }}][description]" value="{{ $feature['description'] ?? '' }}"></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="blog-carousel">
+                                @php $section = $sections['blog_carousel']; @endphp
+                                <div class="home-toggle"><input type="checkbox" name="sections[blog_carousel][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[blog_carousel][label]" value="{{ $section['label'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[blog_carousel][heading]" value="{{ $section['heading'] ?? '' }}"></div>
+                                </div>
+                                <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[blog_carousel][description]">{{ $section['description'] ?? '' }}</textarea></div>
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>View All Text</label><input class="form-control" name="sections[blog_carousel][view_all_text]" value="{{ $section['view_all_text'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Post Mode</label><select class="form-control" name="sections[blog_carousel][post_mode]"><option value="latest" {{ ($section['post_mode'] ?? '') === 'latest' ? 'selected' : '' }}>Latest</option><option value="manual" {{ ($section['post_mode'] ?? '') === 'manual' ? 'selected' : '' }}>Manual</option></select></div>
+                                </div>
+                                <div class="form-group"><label>Post Selection</label><select class="form-control select2" name="sections[blog_carousel][post_ids][]" multiple>@foreach($posts as $post)<option value="{{ $post->id }}" {!! $selected($section['post_ids'] ?? [], $post->id) !!}>{{ $post->title }}</option>@endforeach</select></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="faq-section">
+                                @php $section = $sections['faq_section']; @endphp
+                                <div class="home-toggle"><input type="checkbox" name="sections[faq_section][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[faq_section][label]" value="{{ $section['label'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[faq_section][heading]" value="{{ $section['heading'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Help Icon</label><input class="form-control" name="sections[faq_section][help_icon]" value="{{ $section['help_icon'] ?? '' }}"></div>
+                                </div>
+                                <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[faq_section][description]">{{ $section['description'] ?? '' }}</textarea></div>
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>Help Title</label><input class="form-control" name="sections[faq_section][help_title]" value="{{ $section['help_title'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Help Subtitle</label><input class="form-control" name="sections[faq_section][help_subtitle]" value="{{ $section['help_subtitle'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Button Text</label><input class="form-control" name="sections[faq_section][help_button_text]" value="{{ $section['help_button_text'] ?? '' }}"></div>
+                                </div>
+                                <div data-repeater="faq">
+                                    <div class="home-repeat-list">
+                                        @foreach(($section['items'] ?? []) as $index => $item)
+                                            <div class="home-repeat-item">
+                                                <div class="home-repeat-head"><strong>FAQ</strong><button type="button" class="btn btn-sm btn-danger" data-remove-repeat>Remove</button></div>
+                                                <div class="form-group"><label>Question</label><input class="form-control" name="sections[faq_section][items][{{ $index }}][question]" value="{{ $item['question'] ?? '' }}"></div>
+                                                <div class="form-group"><label>Answer</label><textarea class="form-control" rows="3" name="sections[faq_section][items][{{ $index }}][answer]">{{ $item['answer'] ?? '' }}</textarea></div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-add-repeat="faq">Add More</button>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="all-blog-section">
+                                @php $section = $sections['all_blog_section']; @endphp
+                                <div class="home-toggle"><input type="checkbox" name="sections[all_blog_section][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[all_blog_section][label]" value="{{ $section['label'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[all_blog_section][heading]" value="{{ $section['heading'] ?? '' }}"></div>
+                                </div>
+                                <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[all_blog_section][description]">{{ $section['description'] ?? '' }}</textarea></div>
+                                <div class="home-editor-grid">
+                                    <div class="form-group"><label>Search Placeholder</label><input class="form-control" name="sections[all_blog_section][search_placeholder]" value="{{ $section['search_placeholder'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Category Placeholder</label><input class="form-control" name="sections[all_blog_section][category_placeholder]" value="{{ $section['category_placeholder'] ?? '' }}"></div>
+                                    <div class="form-group"><label>Post Mode</label><select class="form-control" name="sections[all_blog_section][post_mode]"><option value="latest" {{ ($section['post_mode'] ?? '') === 'latest' ? 'selected' : '' }}>Latest</option><option value="manual" {{ ($section['post_mode'] ?? '') === 'manual' ? 'selected' : '' }}>Manual</option></select></div>
+                                </div>
+                                <div class="form-group"><label>Post Selection</label><select class="form-control select2" name="sections[all_blog_section][post_ids][]" multiple>@foreach($posts as $post)<option value="{{ $post->id }}" {!! $selected($section['post_ids'] ?? [], $post->id) !!}>{{ $post->title }}</option>@endforeach</select></div>
+                            </div>
+                        </div>
+
+                        <div class="home-editor-actions">
+                            <button type="submit" class="btn btn-secondary">Save Home Page</button>
                         </div>
                     </div>
                 </div>
             </div>
-		</div>
-	</div>
-
+        </div>
+    </form>
 </div>
-
-</div>
-<!-- End of Main Content -->
-
-
-
 @endsection
 
 @section('scripts')
-    <script type="" src="{{asset('assets/back/js/select2.js')}}"></script>
+    <script src="{{ asset('assets/back/js/select2.js') }}"></script>
     <script>
-        $('#basic').select2({
-			theme: "bootstrap"
-		});
+        $('.select2').select2({ theme: 'bootstrap', width: '100%' });
+
+        function renderSelectedImage(input) {
+            var file = input.files && input.files[0];
+            var upload = input.closest('.home-upload');
+            var preview = upload ? upload.querySelector('.home-image-preview') : null;
+            if (!file || !preview) return;
+
+            var status = upload.querySelector('[data-upload-file]');
+            if (status) status.textContent = file.name;
+
+            preview.innerHTML = '';
+            var image = document.createElement('img');
+            image.src = URL.createObjectURL(file);
+            image.onload = function () { URL.revokeObjectURL(image.src); };
+            preview.appendChild(image);
+        }
+
+        function setDroppedFile(input, file) {
+            if (!file || ['image/jpeg', 'image/png', 'image/webp'].indexOf(file.type) === -1) return;
+            var transfer = new DataTransfer();
+            transfer.items.add(file);
+            input.files = transfer.files;
+            renderSelectedImage(input);
+        }
+
+        document.querySelectorAll('.home-image-input').forEach(function (input, index) {
+            if (!input.id) {
+                input.id = 'home-image-input-' + index;
+            }
+
+            var box = document.createElement('label');
+            box.className = 'home-upload-box';
+            box.setAttribute('for', input.id);
+            box.innerHTML =
+                '<span class="home-upload-icon"><i class="fas fa-cloud-upload-alt" aria-hidden="true"></i></span>' +
+                '<span>' +
+                '<span class="home-upload-title">Click to upload image</span>' +
+                '<span class="home-upload-help">Supported formats: JPG, PNG, WEBP</span>' +
+                '<span class="home-upload-file" data-upload-file>No file selected</span>' +
+                '</span>';
+
+            input.parentNode.insertBefore(box, input);
+
+            ['dragenter', 'dragover'].forEach(function (eventName) {
+                box.addEventListener(eventName, function (event) {
+                    event.preventDefault();
+                    box.classList.add('is-dragover');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(function (eventName) {
+                box.addEventListener(eventName, function (event) {
+                    event.preventDefault();
+                    box.classList.remove('is-dragover');
+                });
+            });
+
+            box.addEventListener('drop', function (event) {
+                if (event.dataTransfer && event.dataTransfer.files.length) {
+                    setDroppedFile(input, event.dataTransfer.files[0]);
+                }
+            });
+        });
+
+        document.querySelectorAll('.home-image-input').forEach(function (input) {
+            input.addEventListener('change', function () {
+                renderSelectedImage(input);
+            });
+        });
+
+        document.addEventListener('change', function (event) {
+            if (!event.target.matches('.home-image-input')) return;
+            renderSelectedImage(event.target);
+        });
+
+        document.addEventListener('click', function (event) {
+            if (event.target.matches('[data-remove-repeat]')) {
+                event.target.closest('.home-repeat-item').remove();
+            }
+
+            if (event.target.matches('[data-add-repeat="faq"]')) {
+                var list = document.querySelector('[data-repeater="faq"] .home-repeat-list');
+                var index = list.querySelectorAll('.home-repeat-item').length;
+                var wrapper = document.createElement('div');
+                wrapper.className = 'home-repeat-item';
+                wrapper.innerHTML =
+                    '<div class="home-repeat-head"><strong>FAQ</strong><button type="button" class="btn btn-sm btn-danger" data-remove-repeat>Remove</button></div>' +
+                    '<div class="form-group"><label>Question</label><input class="form-control" name="sections[faq_section][items][' + index + '][question]"></div>' +
+                    '<div class="form-group"><label>Answer</label><textarea class="form-control" rows="3" name="sections[faq_section][items][' + index + '][answer]"></textarea></div>';
+                list.appendChild(wrapper);
+            }
+
+        });
     </script>
 @endsection

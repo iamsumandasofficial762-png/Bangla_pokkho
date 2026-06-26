@@ -11,9 +11,9 @@
 
     <div class="container">
         <header class="home-latest-blog-heading">
-            <span>ব্লগ</span>
-            <h2 id="home-latest-blog-title">আমাদের ব্লগের সর্বশেষ পোস্ট</h2>
-            <p>বাঙালি ঐতিহ্য উদযাপন ও সমাজকে শক্তিশালী করার পথে বাংলা পক্ষের গল্প, খবর ও ভাবনা পড়ুন।</p>
+            <span>{{ $latestSection['label'] ?? 'ব্লগ' }}</span>
+            <h2 id="home-latest-blog-title">{{ $latestSection['heading'] ?? 'আমাদের ব্লগের সর্বশেষ পোস্ট' }}</h2>
+            <p>{{ $latestSection['description'] ?? '' }}</p>
         </header>
 
         @if ($latestBlogs->isNotEmpty())
@@ -21,7 +21,7 @@
                 <label class="home-latest-blog-search">
                     <i class="fas fa-search" aria-hidden="true"></i>
                     <span class="sr-only">শিরোনাম দিয়ে ব্লগ খুঁজুন</span>
-                    <input type="search" placeholder="ব্লগ খুঁজুন" data-home-blog-search>
+                    <input type="search" placeholder="{{ $latestSection['search_placeholder'] ?? 'ব্লগ খুঁজুন' }}" data-home-blog-search>
                     <button class="home-latest-blog-clear" type="button" data-home-blog-clear
                         aria-label="ব্লগ খোঁজা মুছুন" hidden>
                         <i class="fas fa-times" aria-hidden="true"></i>
@@ -31,7 +31,7 @@
                 <label class="home-latest-blog-category">
                     <span class="sr-only">ক্যাটাগরি দিয়ে ফিল্টার করুন</span>
                     <select data-home-blog-category>
-                        <option value="">সব ক্যাটাগরি</option>
+                        <option value="">{{ $latestSection['category_placeholder'] ?? 'সব ক্যাটাগরি' }}</option>
                         @foreach ($blogCategories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
@@ -91,7 +91,6 @@
                     </article>
                 @endforeach
             </div>
-
         @else
             <div class="home-latest-blog-empty">
                 <i class="far fa-newspaper" aria-hidden="true"></i>

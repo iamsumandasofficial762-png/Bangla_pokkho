@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Back;
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\HomeCutomize;
+use App\Models\HomePageSection;
+use App\Models\Post;
+use App\Support\HomePageContent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class HomePageController extends Controller
 {
@@ -23,19 +27,139 @@ class HomePageController extends Controller
 
 
     public function index(){
-        $data = HomeCutomize::first();
-
-        return view('back.home-page.index',[
-            'hero_banner' => json_decode($data->hero_banner,true),
-            'first_banner' => json_decode($data->banner_first,true),
-            'secend_banner' => json_decode($data->banner_secend,true),
-            'third_banner' => json_decode($data->banner_third,true),
-            'popular_category' => json_decode($data->popular_category,true),
-            'three_column_category' => json_decode($data->two_column_category,true),
-            'feature_category' => json_decode($data->feature_category,true),
-            'home4_banner' => json_decode($data->home_page4,true),
-            'home_4_popular_category' => json_decode($data->home_4_popular_category,true),
+        return view('back.home-page.index', [
+            'sections' => HomePageContent::all(),
+            'posts' => Post::orderByDesc('created_at')->orderByDesc('id')->get(['id', 'title']),
         ]);
+    }
+
+    public function updateBanglaPokkhoHome(Request $request)
+    {
+        $request->validate([
+            'sections' => 'array',
+            'images' => 'array',
+        ]);
+        $this->validateHomeImages($request);
+
+        $inputSections = $request->input('sections', []);
+        $existingSections = HomePageContent::all();
+        $uploadedImages = $request->file('images', []);
+
+        foreach (HomePageContent::keys() as $index => $key) {
+            $data = $inputSections[$key] ?? [];
+            $data['enabled'] = $request->boolean("sections.$key.enabled");
+            $data = array_replace_recursive($existingSections[$key] ?? [], $data);
+            if (in_array($key, ['recent_blog', 'blog_carousel', 'all_blog_section']) && !$request->has("sections.$key.post_ids")) {
+                $data['post_ids'] = [];
+            }
+            if ($key === 'faq_section') {
+                $data['items'] = $inputSections[$key]['items'] ?? [];
+            }
+            $data = $this->normalizeHomeSectionData($data);
+            $data = $this->mergeHomeSectionImages($data, $uploadedImages[$key] ?? [], $existingSections[$key] ?? []);
+
+            HomePageSection::updateOrCreate(
+                ['section_key' => $key],
+                [
+                    'title' => $data['heading'] ?? $data['title'] ?? null,
+                    'subtitle' => $data['label'] ?? $data['subtitle'] ?? null,
+                    'content' => $data['description'] ?? null,
+                    'data' => $data,
+                    'is_enabled' => (bool) ($data['enabled'] ?? true),
+                    'sort_order' => $index,
+                ]
+            );
+        }
+
+        return redirect()->back()->withSuccess(__('Home page updated successfully.'));
+    }
+
+    private function validateHomeImages(Request $request)
+    {
+        $rules = [];
+        $this->collectHomeImageRules($request->allFiles()['images'] ?? [], 'images', $rules);
+
+        if ($rules) {
+            $request->validate($rules);
+        }
+    }
+
+    private function collectHomeImageRules($files, $prefix, array &$rules)
+    {
+        foreach ($files as $key => $value) {
+            $path = $prefix . '.' . $key;
+
+            if (is_array($value)) {
+                $this->collectHomeImageRules($value, $path, $rules);
+            } else {
+                $rules[$path] = 'image|mimes:jpg,jpeg,png,webp';
+            }
+        }
+    }
+
+    private function normalizeHomeSectionData(array $data)
+    {
+        foreach (['post_ids', 'small_post_ids'] as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                $data[$key] = array_values(array_filter($data[$key]));
+            }
+        }
+
+        foreach (['cards', 'features', 'tabs', 'items'] as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                $data[$key] = array_values($data[$key]);
+            }
+        }
+
+        if (isset($data['tabs']) && is_array($data['tabs'])) {
+            foreach ($data['tabs'] as $tabIndex => $tab) {
+                $bullets = $tab['bullets'] ?? [];
+                if (is_string($bullets)) {
+                    $bullets = preg_split('/\r\n|\r|\n/', $bullets);
+                }
+                $data['tabs'][$tabIndex]['bullets'] = array_values(array_filter(array_map('trim', (array) $bullets)));
+            }
+        }
+
+        return $data;
+    }
+
+    private function mergeHomeSectionImages(array $data, array $files, array $existing)
+    {
+        foreach ($files as $field => $value) {
+            if (is_array($value)) {
+                foreach ($value as $index => $nestedFiles) {
+                    foreach ((array) $nestedFiles as $nestedField => $file) {
+                        if ($file) {
+                            $old = $existing[$field][$index][$nestedField] ?? null;
+                            $data[$field][$index][$nestedField] = $this->storeHomeImage($file, $old);
+                        }
+                    }
+                }
+            } elseif ($value) {
+                $data[$field] = $this->storeHomeImage($value, $existing[$field] ?? null);
+            }
+        }
+
+        return $data;
+    }
+
+    private function storeHomeImage($file, $old = null)
+    {
+        $name = ImageHelper::handleUploadedImage($file, 'images', $old);
+        $storedPath = storage_path('app/public/images/' . $name);
+        $publicPath = public_path('storage/images/' . $name);
+
+        File::ensureDirectoryExists(dirname($publicPath));
+        if (File::exists($storedPath)) {
+            File::copy($storedPath, $publicPath);
+        }
+
+        if ($old && $old !== $name) {
+            File::delete(public_path('storage/images/' . $old));
+        }
+
+        return $name;
     }
 
     public function hero_banner_update(Request $request)
