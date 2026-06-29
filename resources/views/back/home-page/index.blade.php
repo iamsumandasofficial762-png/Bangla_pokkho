@@ -78,7 +78,7 @@
 @php
     $imageUrl = function ($image) {
         return $image && file_exists(public_path('storage/images/' . $image))
-            ? url('/core/public/storage/images/' . $image)
+            ? url('storage/images/' . $image)
             : null;
     };
     $selected = fn ($ids, $id) => in_array($id, array_map('intval', (array) $ids)) ? 'selected' : '';
@@ -160,13 +160,11 @@
                                 </div>
                                 <div class="form-group"><label>Description</label><textarea class="form-control" rows="4" name="sections[about_section][description]">{{ $section['description'] ?? '' }}</textarea></div>
                                 <div class="home-editor-grid">
-                                    @foreach(['main_image' => 'Main Image', 'decorative_image' => 'Decorative Image'] as $field => $label)
-                                        <div class="form-group home-upload">
-                                            <label>{{ $label }}</label><br>
-                                            <span class="home-image-preview">@if($imageUrl($section[$field] ?? null))<img src="{{ $imageUrl($section[$field]) }}" data-preview-target="{{ $field }}">@endif</span>
-                                            <input type="file" class="form-control-file mt-2 home-image-input" name="images[about_section][{{ $field }}]" accept="image/jpeg,image/png,image/webp">
-                                        </div>
-                                    @endforeach
+                                    <div class="form-group home-upload">
+                                        <label>Main Image</label><br>
+                                        <span class="home-image-preview">@if($imageUrl($section['main_image'] ?? null))<img src="{{ $imageUrl($section['main_image']) }}" data-preview-target="main_image">@endif</span>
+                                        <input type="file" class="form-control-file mt-2 home-image-input" name="images[about_section][main_image]" accept="image/jpeg,image/png,image/webp">
+                                    </div>
                                 </div>
                                 <h5>Tabs</h5>
                                 @foreach(($section['tabs'] ?? []) as $index => $tab)
@@ -237,11 +235,7 @@
                                     <div class="form-group"><label>Heading</label><input class="form-control" name="sections[blog_carousel][heading]" value="{{ $section['heading'] ?? '' }}"></div>
                                 </div>
                                 <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[blog_carousel][description]">{{ $section['description'] ?? '' }}</textarea></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>View All Text</label><input class="form-control" name="sections[blog_carousel][view_all_text]" value="{{ $section['view_all_text'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Post Mode</label><select class="form-control" name="sections[blog_carousel][post_mode]"><option value="latest" {{ ($section['post_mode'] ?? '') === 'latest' ? 'selected' : '' }}>Latest</option><option value="manual" {{ ($section['post_mode'] ?? '') === 'manual' ? 'selected' : '' }}>Manual</option></select></div>
-                                </div>
-                                <div class="form-group"><label>Post Selection</label><select class="form-control select2" name="sections[blog_carousel][post_ids][]" multiple>@foreach($posts as $post)<option value="{{ $post->id }}" {!! $selected($section['post_ids'] ?? [], $post->id) !!}>{{ $post->title }}</option>@endforeach</select></div>
+                                <div class="form-group"><label>View All Text</label><input class="form-control" name="sections[blog_carousel][view_all_text]" value="{{ $section['view_all_text'] ?? '' }}"></div>
                             </div>
 
                             <div class="tab-pane fade" id="faq-section">

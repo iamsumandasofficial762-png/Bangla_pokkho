@@ -49,7 +49,7 @@
 				<div class="row">
 					<div class="col-lg-4 offset-lg-4">
 						<div class="maintain-img-wrapper">
-							<img src="{{url('/core/public/storage/images/'.$setting->maintainance_image)}}" alt="">
+							<img src="{{url('storage/images/'.$setting->maintainance_image)}}" alt="">
 						</div>
 					</div>
 				</div>

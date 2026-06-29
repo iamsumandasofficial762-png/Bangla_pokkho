@@ -11,7 +11,7 @@
         @endphp
         <div class="entry">
             <div class="entry-thumb"><a href="{{ route('front.product', $cart['slug']) }}"><img
-                        src="{{ url('/core/public/storage/images/' . $cart['photo']) }}" alt="Product"></a></div>
+                        src="{{ url('storage/images/' . $cart['photo']) }}" alt="Product"></a></div>
             <div class="entry-content">
                 <h4 class="entry-title"><a href="{{ route('front.product', $cart['slug']) }}">
                         {{ Str::limit($cart['name'], 29) }}

@@ -1,7 +1,7 @@
 @php
     $inputId = $inputId ?? 'blog-photo-input';
     $currentPhoto = $currentPhoto ?? null;
-    $currentPhotoUrl = $currentPhoto ? url('/core/public/storage/images/' . $currentPhoto) : '';
+    $currentPhotoUrl = $currentPhoto ? url('storage/images/' . $currentPhoto) : '';
 @endphp
 
 @once

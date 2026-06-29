@@ -49,7 +49,7 @@ class HomePageController extends Controller
             $data = $inputSections[$key] ?? [];
             $data['enabled'] = $request->boolean("sections.$key.enabled");
             $data = array_replace_recursive($existingSections[$key] ?? [], $data);
-            if (in_array($key, ['recent_blog', 'blog_carousel', 'all_blog_section']) && !$request->has("sections.$key.post_ids")) {
+            if (in_array($key, ['recent_blog', 'all_blog_section']) && !$request->has("sections.$key.post_ids")) {
                 $data['post_ids'] = [];
             }
             if ($key === 'faq_section') {

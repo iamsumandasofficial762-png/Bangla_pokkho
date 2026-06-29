@@ -13,7 +13,7 @@
             @foreach ($categories as $key => $pcategory)
                 <div class="c-item">
                     <a class="d-block navi-link" href="{{route('front.catalog').'?category='.$pcategory->slug}}">
-                        <img class="lazy" data-src="{{url('/core/public/storage/images/'.$pcategory->photo)}}">
+                        <img class="lazy" data-src="{{url('storage/images/'.$pcategory->photo)}}">
                         <span class="text-gray-dark">{{$pcategory->name}}</span>
                         @if ($pcategory->subcategory->count() > 0)
                         <i class="icon-chevron-right"></i>
@@ -44,7 +44,7 @@
                 </div>
             @endforeach
         <a href="{{route('front.catalog')}}" class="d-block navi-link view-all-category">
-            <img class="lazy" data-src="{{ url('/core/public/storage/images/category.jpg') }}" alt="">
+            <img class="lazy" data-src="{{ url('storage/images/category.jpg') }}" alt="">
             <span class="text-gray-dark">{{ $isHomePage ? 'সব ক্যাটাগরি' : __('All Categories')}}</span>
         </a>
     </div>

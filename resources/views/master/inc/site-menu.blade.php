@@ -5,6 +5,7 @@
     $isHomePage = request()->routeIs('front.index');
     $homeMenuText = [
         'Home' => 'হোম',
+        'About Us' => 'আমাদের সম্পর্কে',
         'Shop' => 'দোকান',
         'Campaign' => 'প্রচারাভিযান',
         'Blog' => 'ব্লগ',

@@ -40,7 +40,7 @@
                     <article class="more-post-card">
                         <a class="more-post-image" href="{{ route('front.blog.details', $post->slug) }}"
                             aria-label="{{ $post->title }}">
-                            <img src="{{ url('/core/public/storage/images/' . $postImage) }}"
+                            <img src="{{ url('storage/images/' . $postImage) }}"
                                 alt="{{ $post->title }}" loading="lazy">
                         </a>
 
@@ -52,7 +52,7 @@
                             <p>{{ $excerpt ?: 'আরও জানতে পুরো লেখাটি পড়ুন।' }}</p>
 
                             <div class="more-post-author">
-                                <img src="{{ url('/core/public/storage/images/' . $fallbackAvatar) }}"
+                                <img src="{{ url('storage/images/' . $fallbackAvatar) }}"
                                     alt="{{ $fallbackAuthorName }}">
                                 <div>
                                     <span>{{ $fallbackAuthorName }}</span>

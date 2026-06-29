@@ -6,9 +6,9 @@
 
 @section('pagestyles')
     <link rel="stylesheet"
-        href="{{ url('/core/public/css/homepage-blog.css') }}?v={{ filemtime(public_path('css/homepage-blog.css')) }}">
+        href="{{ url('css/homepage-blog.css') }}?v={{ filemtime(public_path('css/homepage-blog.css')) }}">
     <link rel="stylesheet"
-        href="{{ url('/core/public/css/homepage-latest-blog.css') }}?v={{ filemtime(public_path('css/homepage-latest-blog.css')) }}">
+        href="{{ url('css/homepage-latest-blog.css') }}?v={{ filemtime(public_path('css/homepage-latest-blog.css')) }}">
 @endsection
 
 @section('content')
@@ -58,7 +58,7 @@
 
                         <a class="recent-blog-card recent-blog-card--featured"
                             href="{{ route('front.blog.details', $featuredPost->slug) }}">
-                            <img src="{{ url('/core/public/storage/images/' . $featuredImage) }}"
+                            <img src="{{ url('storage/images/' . $featuredImage) }}"
                                 alt="{{ $featuredPost->title }}">
                             <span class="recent-blog-overlay"></span>
                             <span class="recent-blog-content">
@@ -82,7 +82,7 @@
 
                                     <a class="recent-blog-card recent-blog-card--small"
                                         href="{{ route('front.blog.details', $post->slug) }}">
-                                        <img src="{{ url('/core/public/storage/images/' . $postImage) }}"
+                                        <img src="{{ url('storage/images/' . $postImage) }}"
                                             alt="{{ $post->title }}">
                                         <span class="recent-blog-overlay"></span>
                                         <span class="recent-blog-content">
@@ -111,7 +111,6 @@
     @if (!empty($aboutSection['enabled']))
         @php
             $aboutMainImage = $imageName($aboutSection['main_image'] ?? null);
-            $aboutDecorativeImage = $imageName($aboutSection['decorative_image'] ?? 'nouka_w.png', 'nouka_w.png');
         @endphp
 
         <section class="about-pokkho-section" aria-labelledby="about-pokkho-title">
@@ -119,7 +118,7 @@
                 <div class="about-pokkho-layout">
                     <div class="about-pokkho-visual">
                         <div class="about-pokkho-image-frame">
-                            <img src="{{ url('/core/public/storage/images/' . $aboutMainImage) }}"
+                            <img src="{{ url('storage/images/' . $aboutMainImage) }}"
                                 alt="{{ $aboutSection['subtitle'] ?? 'বাংলা পক্ষ সম্পর্কে' }}">
                         </div>
                     </div>
@@ -154,7 +153,7 @@
                                     id="about-panel-{{ $tabKey }}" role="tabpanel"
                                     aria-labelledby="about-tab-{{ $tabKey }}" data-about-panel="{{ $tabKey }}"
                                     {{ $tabIndex === 0 ? '' : 'hidden' }}>
-                                    <img src="{{ url('/core/public/storage/images/' . $tabImage) }}"
+                                    <img src="{{ url('storage/images/' . $tabImage) }}"
                                         alt="{{ $tab['title'] ?? $tab['name'] ?? '' }}">
                                     <div>
                                         <p>{{ $tab['description'] ?? '' }}</p>
@@ -170,8 +169,6 @@
                     </div>
                 </div>
             </div>
-            <img src="{{ url('/core/public/storage/images/' . $aboutDecorativeImage) }}" class="about-boat-decoration"
-                alt="" aria-hidden="true">
         </section>
     @endif
 
@@ -199,11 +196,11 @@
 @endsection
 
 @section('script')
-    <script src="{{ url('/core/public/js/homepage-about.js') }}"></script>
-    <script src="{{ url('/core/public/js/homepage-heritage.js') }}?v={{ filemtime(public_path('js/homepage-heritage.js')) }}"></script>
-    <script src="{{ url('/core/public/js/homepage-faq.js') }}?v={{ filemtime(public_path('js/homepage-faq.js')) }}"></script>
-    <script src="{{ url('/core/public/js/homepage-latest-blog.js') }}?v={{ filemtime(public_path('js/homepage-latest-blog.js')) }}"></script>
+    <script src="{{ url('js/homepage-about.js') }}"></script>
+    <script src="{{ url('js/homepage-heritage.js') }}?v={{ filemtime(public_path('js/homepage-heritage.js')) }}"></script>
+    <script src="{{ url('js/homepage-faq.js') }}?v={{ filemtime(public_path('js/homepage-faq.js')) }}"></script>
+    <script src="{{ url('js/homepage-latest-blog.js') }}?v={{ filemtime(public_path('js/homepage-latest-blog.js')) }}"></script>
     @if (!empty($carouselSection['enabled']) && $carouselPosts->isNotEmpty())
-        <script src="{{ url('/core/public/js/homepage-blog-carousel.js') }}?v={{ filemtime(public_path('js/homepage-blog-carousel.js')) }}"></script>
+        <script src="{{ url('js/homepage-blog-carousel.js') }}?v={{ filemtime(public_path('js/homepage-blog-carousel.js')) }}"></script>
     @endif
 @endsection

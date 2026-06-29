@@ -29,7 +29,7 @@
                         data-heritage-card="{{ $cardIndex }}" aria-expanded="false"
                         aria-controls="heritage-detail-{{ $cardIndex }}">
                         <div class="heritage-feature-image">
-                            <img src="{{ url('/core/public/storage/images/' . $cardImage) }}"
+                            <img src="{{ url('storage/images/' . $cardImage) }}"
                                 alt="{{ $card['title'] ?? '' }}" loading="lazy">
                         </div>
                         <div class="heritage-feature-icon" aria-hidden="true">
@@ -65,7 +65,7 @@
                             </ul>
 
                             <div class="heritage-detail-image">
-                                <img src="{{ url('/core/public/storage/images/' . $cardImage) }}"
+                                <img src="{{ url('storage/images/' . $cardImage) }}"
                                     alt="{{ $card['title'] ?? '' }}" loading="lazy">
                             </div>
                         </div>

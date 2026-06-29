@@ -65,7 +65,7 @@
                         data-category="{{ $blogCategoryId }}">
                         <a class="home-latest-blog-image" href="{{ route('front.blog.details', $post->slug) }}"
                             aria-label="{{ $post->title }}">
-                            <img src="{{ url('/core/public/storage/images/' . $blogImage) }}"
+                            <img src="{{ url('storage/images/' . $blogImage) }}"
                                 alt="{{ $post->title }}" loading="lazy">
                         </a>
 
@@ -77,7 +77,7 @@
                             <p>{{ $blogExcerpt ?: 'সম্পূর্ণ লেখা পড়ুন এবং বাংলা পক্ষ সম্পর্কে আরও জানুন।' }}</p>
 
                             <div class="home-latest-blog-meta">
-                                <img src="{{ url('/core/public/storage/images/' . $blogAvatar) }}" alt="{{ $blogAuthor }}">
+                                <img src="{{ url('storage/images/' . $blogAvatar) }}" alt="{{ $blogAuthor }}">
                                 <div>
                                     <strong>{{ $blogAuthor }}</strong>
                                     @if ($post->created_at)

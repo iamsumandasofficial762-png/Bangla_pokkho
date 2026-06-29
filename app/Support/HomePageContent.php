@@ -50,7 +50,7 @@ class HomePageContent
             return null;
         }
 
-        return url('/core/public/storage/images/' . $fileName);
+        return url('storage/images/' . $fileName);
     }
 
     public static function postsFor(array $config, $count = 5, $skipIds = [])

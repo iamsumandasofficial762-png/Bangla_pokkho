@@ -1,0 +1,46 @@
+@font-face {
+    font-family: 'Amar Sonar Bangla';
+    src: url('../fonts/JashirAbhyuday%20%281%29/Unicode/Li%20Jashir%20Abhyuday%20Unicode.ttf') format('truetype');
+    font-display: swap;
+    font-style: normal;
+    font-weight: normal;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+    font-family: 'Amar Sonar Bangla', sans-serif;
+}
+
+body {
+    font-size: 18px;
+}
+
+body :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    a,
+    span,
+    strong,
+    small,
+    label,
+    li,
+    button,
+    input,
+    select,
+    option,
+    textarea,
+    time,
+    th,
+    td,
+    figcaption
+):not([class^="icon-"]):not([class*=" icon-"]):not(.fa):not(.fas):not(.far):not(.fab) {
+    font-family: 'Amar Sonar Bangla', sans-serif !important;
+}

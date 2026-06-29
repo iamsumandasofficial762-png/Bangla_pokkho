@@ -120,7 +120,7 @@ class FrontendController extends Controller
                 return [
                     'title' => $post->title,
                     'url' => route('front.blog.details', $post->slug),
-                    'image' => url('/core/public/storage/images/' . $image),
+                    'image' => url('storage/images/' . $image),
                     'date' => optional($post->created_at)->diffForHumans(),
                     'category' => optional($post->category)->name ?: __('Blog'),
                 ];
