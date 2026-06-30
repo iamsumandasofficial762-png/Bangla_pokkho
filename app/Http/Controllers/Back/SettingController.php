@@ -14,6 +14,7 @@ use App\{
 };
 use App\Models\ExtraSetting;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 class SettingController extends Controller
 {
@@ -92,8 +93,20 @@ class SettingController extends Controller
      */
     public function update(SettingRequest $request)
     {
-        $this->repository->update($request);
-        return redirect()->back()->withSuccess(__('Data Updated Successfully.'));
+        try {
+            $this->repository->update($request);
+
+            return redirect()->back()->withSuccess(__('Data Updated Successfully.'));
+        } catch (\Throwable $exception) {
+            Log::error('General settings update failed.', [
+                'exception' => $exception,
+                'admin_id' => auth('admin')->id(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->withError(__('The settings could not be updated. Please try the upload again.'));
+        }
     }
 
 

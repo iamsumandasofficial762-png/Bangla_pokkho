@@ -35,11 +35,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <!-- Favicon Icons-->
-    <link rel="icon" type="image/png" href="{{ url('storage/images/' . $setting->favicon) }}">
-    <link rel="apple-touch-icon" href="{{ url('storage/images/' . $setting->favicon) }}">
-    <link rel="apple-touch-icon" sizes="152x152" href="{{ url('storage/images/' . $setting->favicon) }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url('storage/images/' . $setting->favicon) }}">
-    <link rel="apple-touch-icon" sizes="167x167" href="{{ url('storage/images/' . $setting->favicon) }}">
+    <link rel="icon" type="image/png" href="{{ asset('storage/images/' . ($setting->favicon ?: 'placeholder.png')) }}">
+    <link rel="apple-touch-icon" href="{{ asset('storage/images/' . ($setting->favicon ?: 'placeholder.png')) }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('storage/images/' . ($setting->favicon ?: 'placeholder.png')) }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('storage/images/' . ($setting->favicon ?: 'placeholder.png')) }}">
+    <link rel="apple-touch-icon" sizes="167x167" href="{{ asset('storage/images/' . ($setting->favicon ?: 'placeholder.png')) }}">
 
     <!-- Vendor Styles including: Bootstrap, Font Icons, Plugins, etc.-->
     <link rel="stylesheet" media="screen" href="{{ asset('assets/front/css/plugins.min.css') }}">
@@ -186,7 +186,7 @@ body_theme4 @endif
         <!-- Preloader Start -->
         @if ($setting->is_loader == 1)
             <div id="preloader">
-                <img src="{{ url('storage/images/' . $setting->loader) }}" alt="{{ __('Loading...') }}">
+                <img src="{{ asset('storage/images/' . ($setting->loader ?: 'placeholder.png')) }}" alt="{{ __('Loading...') }}">
             </div>
         @endif
 
@@ -312,7 +312,7 @@ body_theme4 @endif
                             <!-- Logo-->
                             <div class="site-branding"><a class="site-logo align-self-center"
                                     href="{{ route('front.index') }}"><img
-                                        src="{{ url('storage/images/' . $setting->logo) }}"
+                                        src="{{ asset('storage/images/' . ($setting->logo ?: 'placeholder.png')) }}"
                                         alt="{{ $setting->title }}"></a></div>
                             <!-- Search / Categories-->
                             <div class="search-box-wrap d-none d-lg-block d-flex">

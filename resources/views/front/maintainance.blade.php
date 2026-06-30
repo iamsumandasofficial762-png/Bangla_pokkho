@@ -3,7 +3,7 @@
 	<head>
         <title>Maintainance Mode</title>
 		<!-- favicon -->
-		<link rel="shortcut icon" href="{{asset('assets/front/img/'.$setting->favicon)}}" type="image/x-icon">
+		<link rel="shortcut icon" href="{{ asset('storage/images/' . ($setting->favicon ?: 'placeholder.png')) }}" type="image/x-icon">
 		<link href='https://fonts.googleapis.com/css?family=Lato:400' rel='stylesheet' type='text/css'>
 		<!-- bootstrap css -->
 		<link rel="stylesheet" media="screen" href="{{asset('assets/front/css/plugins.min.css')}}">
@@ -64,5 +64,4 @@
 		</div>
 	</body>
 </html>
-
 

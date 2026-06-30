@@ -5,7 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>{{ $setting->title }}</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-    <link rel="icon" type="image/x-icon" href="{{ url('storage/images/' . $setting->favicon) }}" />
+    <link rel="icon" type="image/x-icon"
+        href="{{ asset('storage/images/' . ($setting->favicon ?: 'placeholder.png')) }}" />
 
     <!-- Fonts and icons -->
     <script src="{{ asset('assets/back/js/plugin/webfont/webfont.min.js') }}"></script>
@@ -40,7 +41,7 @@
             <div class="logo-header">
 
                 <a href="{{ route('back.dashboard') }}" class="logo">
-                    <img src="{{ $setting->logo ? url('storage/images/' . $setting->logo) : url('storage/images/placeholder.png') }}"
+                    <img src="{{ asset('storage/images/' . ($setting->logo ?: 'placeholder.png')) }}"
                         alt="navbar brand" class="navbar-brand">
                 </a>
                 <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse"

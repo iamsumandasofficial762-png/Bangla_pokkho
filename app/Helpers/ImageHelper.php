@@ -3,10 +3,45 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class ImageHelper
 {
+    /**
+     * Store a settings image in the project's publicly served upload folder.
+     *
+     * This works whether public/storage is a real directory (legacy installs)
+     * or a symlink created by `php artisan storage:link`.
+     */
+    public static function storePublicSettingImage($file, $path = 'images')
+    {
+        $directory = public_path('storage/' . trim($path, '/'));
+        File::ensureDirectoryExists($directory);
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        $name = 'setting_' . time() . '_' . Str::random(12) . '.' . $extension;
+
+        $file->move($directory, $name);
+
+        return $name;
+    }
+
+    public static function deletePublicSettingImage($name, $path = 'images')
+    {
+        if (empty($name)) {
+            return;
+        }
+
+        $name = basename($name);
+
+        if (in_array($name, ['placeholder.png', 'noimage.png', 'ajax_loader.gif'], true)) {
+            return;
+        }
+
+        File::delete(public_path('storage/' . trim($path, '/') . '/' . $name));
+    }
+
     public static function handleUploadedImage($file, $path, $delete = null)
     {
         if ($file) {

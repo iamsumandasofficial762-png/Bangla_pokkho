@@ -292,6 +292,15 @@
 
                                                 <div id="media" class="tab-pane"><br>
 
+                                                    @php
+                                                        $logoFile = $setting->logo ? basename($setting->logo) : null;
+                                                        $faviconFile = $setting->favicon ? basename($setting->favicon) : null;
+                                                        $loaderFile = $setting->loader ? basename($setting->loader) : null;
+                                                        $logoExists = $logoFile && file_exists(public_path('storage/images/' . $logoFile));
+                                                        $faviconExists = $faviconFile && file_exists(public_path('storage/images/' . $faviconFile));
+                                                        $loaderExists = $loaderFile && file_exists(public_path('storage/images/' . $loaderFile));
+                                                    @endphp
+
                                                     <div class="row justify-content-center">
 
                                                         <div class="col-lg-8">
@@ -323,22 +332,32 @@
                                                                                 <label
                                                                                     for="name">{{ __('Current Image') }}</label>
                                                                                 <div class="col-lg-12 pb-1">
-                                                                                    <img class="admin-setting-img"
-                                                                                        src="{{ $setting->logo ? url('storage/images/' . $setting->logo) : url('storage/images/placeholder.png') }}"
-                                                                                        alt="No Image Found">
+                                                                                    <img id="logo-preview"
+                                                                                        class="admin-setting-img {{ $logoExists ? '' : 'd-none' }}"
+                                                                                        src="{{ $logoExists ? asset('storage/images/' . $logoFile) : '' }}"
+                                                                                        alt="{{ __('Logo preview') }}">
+                                                                                    <div id="logo-empty"
+                                                                                        class="text-muted {{ $logoExists ? 'd-none' : '' }}">
+                                                                                        {{ __('No Image Found') }}
+                                                                                    </div>
                                                                                 </div>
                                                                                 <span>{{ __('Image Size Should Be 140 x 40.') }}</span>
                                                                             </div>
 
                                                                             <div class="form-group position-relative ">
                                                                                 <label class="file">
-                                                                                    <input type="file" accept="image/*"
+                                                                                    <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg,.ico,image/jpeg,image/png,image/webp,image/svg+xml,image/x-icon"
                                                                                         class="upload-photo"
-                                                                                        name="logo" id="file"
+                                                                                        name="logo" id="logo-file"
+                                                                                        data-media-preview="#logo-preview"
+                                                                                        data-media-empty="#logo-empty"
                                                                                         aria-label="File browser example">
                                                                                     <span
                                                                                         class="file-custom text-left">{{ __('Upload Image...') }}</span>
                                                                                 </label>
+                                                                                @error('logo')
+                                                                                    <small class="text-danger d-block">{{ $message }}</small>
+                                                                                @enderror
                                                                             </div>
 
                                                                         </div>
@@ -355,22 +374,32 @@
                                                                                 <label
                                                                                     for="name">{{ __('Current Image') }}</label>
                                                                                 <div class="col-lg-12 pb-1">
-                                                                                    <img class="admin-setting-img my-mw-100"
-                                                                                        src="{{ $setting->favicon ? url('storage/images/' . $setting->favicon) : url('storage/images/placeholder.png') }}"
-                                                                                        alt="No Image Found">
+                                                                                    <img id="favicon-preview"
+                                                                                        class="admin-setting-img my-mw-100 {{ $faviconExists ? '' : 'd-none' }}"
+                                                                                        src="{{ $faviconExists ? asset('storage/images/' . $faviconFile) : '' }}"
+                                                                                        alt="{{ __('Favicon preview') }}">
+                                                                                    <div id="favicon-empty"
+                                                                                        class="text-muted {{ $faviconExists ? 'd-none' : '' }}">
+                                                                                        {{ __('No Image Found') }}
+                                                                                    </div>
                                                                                 </div>
                                                                                 <span>{{ __('Image Size Should Be 16 x 16.') }}</span>
                                                                             </div>
 
                                                                             <div class="form-group position-relative ">
                                                                                 <label class="file">
-                                                                                    <input type="file" accept="image/*"
+                                                                                    <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg,.ico,image/jpeg,image/png,image/webp,image/svg+xml,image/x-icon"
                                                                                         class="upload-photo"
-                                                                                        name="favicon" id="file"
+                                                                                        name="favicon" id="favicon-file"
+                                                                                        data-media-preview="#favicon-preview"
+                                                                                        data-media-empty="#favicon-empty"
                                                                                         aria-label="File browser example">
                                                                                     <span
                                                                                         class="file-custom text-left">{{ __('Upload Image...') }}</span>
                                                                                 </label>
+                                                                                @error('favicon')
+                                                                                    <small class="text-danger d-block">{{ $message }}</small>
+                                                                                @enderror
                                                                             </div>
 
                                                                         </div>
@@ -397,20 +426,30 @@
                                                                                 <label
                                                                                     for="name">{{ __('Current Image') }}</label>
                                                                                 <div class="col-lg-12 pb-1">
-                                                                                    <img class="admin-setting-img my-mw-100"
-                                                                                        src="{{ $setting->loader ? url('storage/images/' . $setting->loader) : url('storage/images/placeholder.png') }}"
-                                                                                        alt="No Image Found">
+                                                                                    <img id="loader-preview"
+                                                                                        class="admin-setting-img my-mw-100 {{ $loaderExists ? '' : 'd-none' }}"
+                                                                                        src="{{ $loaderExists ? asset('storage/images/' . $loaderFile) : '' }}"
+                                                                                        alt="{{ __('Loader preview') }}">
+                                                                                    <div id="loader-empty"
+                                                                                        class="text-muted {{ $loaderExists ? 'd-none' : '' }}">
+                                                                                        {{ __('No Image Found') }}
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="form-group position-relative ">
                                                                                 <label class="file">
-                                                                                    <input type="file" accept="image/*"
+                                                                                    <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg,.ico,image/jpeg,image/png,image/webp,image/svg+xml,image/x-icon"
                                                                                         class="upload-photo"
-                                                                                        name="loader" id="file"
+                                                                                        name="loader" id="loader-file"
+                                                                                        data-media-preview="#loader-preview"
+                                                                                        data-media-empty="#loader-empty"
                                                                                         aria-label="File browser example">
                                                                                     <span
                                                                                         class="file-custom text-left">{{ __('Upload Image...') }}</span>
                                                                                 </label>
+                                                                                @error('loader')
+                                                                                    <small class="text-danger d-block">{{ $message }}</small>
+                                                                                @enderror
                                                                             </div>
 
 
@@ -1094,6 +1133,29 @@
                 matchBrackets: true,
                 theme: "monokai"
             });
+
+            $('[data-media-preview]').on('change', function() {
+                var file = this.files && this.files[0];
+                var preview = $($(this).data('media-preview'));
+                var emptyState = $($(this).data('media-empty'));
+
+                if (!file) {
+                    return;
+                }
+
+                var previewUrl = URL.createObjectURL(file);
+                preview.attr('src', previewUrl).removeClass('d-none');
+                emptyState.addClass('d-none');
+
+                preview.one('load', function() {
+                    URL.revokeObjectURL(previewUrl);
+                });
+            });
+
+            @if ($errors->hasAny(['logo', 'favicon', 'loader']))
+                $('a[href="#media"]').tab('show');
+                $('a[href="#{{ $errors->has('favicon') ? 'favicon' : ($errors->has('loader') ? 'loader' : 'logo') }}"]').tab('show');
+            @endif
         });
     </script>
 @endsection

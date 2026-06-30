@@ -21,15 +21,51 @@ class SettingRepository
         $data = Setting::find(1);
         $input = $request->all();
 
-        $image_files = ['logo', 'favicon', 'loader', 'feature_image', 'announcement', 'footer_gateway_img', 'maintainance_image', 'meta_image'];
+        $media_files = ['logo', 'favicon', 'loader'];
+        $image_files = ['feature_image', 'announcement', 'footer_gateway_img', 'maintainance_image', 'meta_image'];
+        $new_media_files = [];
+        $old_media_files = [];
 
-        $social_fields = ['facebook_check', 'google_check'];
+        try {
+            foreach ($media_files as $media_file) {
+                if ($file = $request->file($media_file)) {
+                    $old_media_files[$media_file] = $data->{$media_file};
+                    $input[$media_file] = ImageHelper::storePublicSettingImage($file);
+                    $new_media_files[$media_file] = $input[$media_file];
+                } else {
+                    unset($input[$media_file]);
+                }
+            }
 
+            $this->updateOtherImages($request, $data, $input, $image_files);
+            $this->prepareSettingValues($request, $input);
+
+            $data->update($input);
+        } catch (\Throwable $exception) {
+            foreach ($new_media_files as $new_media_file) {
+                ImageHelper::deletePublicSettingImage($new_media_file);
+            }
+
+            throw $exception;
+        }
+
+        foreach ($old_media_files as $old_media_file) {
+            ImageHelper::deletePublicSettingImage($old_media_file);
+        }
+    }
+
+    private function updateOtherImages($request, $data, &$input, $image_files)
+    {
         foreach ($image_files as $image_file) {
             if ($file = $request->file($image_file)) {
                 $input[$image_file] = ImageHelper::handleUpdatedUploadedImage($file, 'images', $data, 'images/', $image_file);
             }
         }
+    }
+
+    private function prepareSettingValues($request, &$input)
+    {
+        $social_fields = ['facebook_check', 'google_check'];
 
         if ($request->social_icons && $request->social_links) {
             $links = ['icons' => $request->social_icons, 'links' => $request->social_links];
@@ -110,7 +146,6 @@ class SettingRepository
             $input['meta_keywords'] = str_replace(["value", "{", "}", "[", "]", ":", "\""], '', $request->meta_keywords);
         }
 
-        $data->update($input);
     }
 
     public function checkEmailUrl($url)

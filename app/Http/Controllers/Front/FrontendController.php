@@ -63,30 +63,16 @@ class FrontendController extends Controller
     public function index()
     {
         $homeSections = HomePageContent::all();
-        $recentConfig = $homeSections['recent_blog'];
         $carouselConfig = $homeSections['blog_carousel'];
         $latestConfig = $homeSections['all_blog_section'];
 
-        $featuredPost = null;
-        if (!empty($recentConfig['featured_post_id'])) {
-            $featuredPost = Post::with('category')->find($recentConfig['featured_post_id']);
-        }
-
-        $recentSidePosts = HomePageContent::postsFor($recentConfig, 4, $featuredPost ? [$featuredPost->id] : []);
-        if (!$featuredPost) {
-            $recentPosts = HomePageContent::postsFor($recentConfig, 5);
-            $featuredPost = $recentPosts->first();
-            $recentSidePosts = $recentPosts->skip(1)->take(4)->values();
-        }
-
-        $recentPosts = collect([$featuredPost])->filter()->merge($recentSidePosts)->values();
         $carouselPosts = HomePageContent::postsFor($carouselConfig, (int) ($carouselConfig['post_count'] ?? 3));
         $latestBlogs = HomePageContent::postsFor($latestConfig, (int) ($latestConfig['post_count'] ?? 3));
         $blogCategories = \App\Models\Bcategory::whereStatus(1)
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return view('front.index', compact('recentPosts', 'carouselPosts', 'latestBlogs', 'blogCategories', 'homeSections'));
+        return view('front.index', compact('carouselPosts', 'latestBlogs', 'blogCategories', 'homeSections'));
     }
 
     public function homeBlogSearch(Request $request)
