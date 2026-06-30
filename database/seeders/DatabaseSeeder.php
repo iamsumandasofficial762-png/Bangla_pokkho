@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+// test comment
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\EmailTemplate;
