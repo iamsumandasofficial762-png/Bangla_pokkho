@@ -5128,8 +5128,8 @@ video {
 }
 .site-header .toolbar .toolbar-item > a > div > .text-label {
   display: block;
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 15px;
+  font-weight: 600;
 }
 .quickFilter,
 .site-header .toolbar .toolbar-item > a > div > .cart-icon,
@@ -5184,7 +5184,7 @@ video {
   padding: 13px 30px;
   border-right: 1px solid transparent;
   border-left: 1px solid transparent;
-  font-size: 15px;
+  font-size: 21px;
   z-index: 5;
   font-weight: 500;
 }
@@ -6498,7 +6498,7 @@ video {
   font-size: 14px;
 }
 .track-order-link {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   text-decoration: none;
   display: inline-block;
@@ -6553,7 +6553,7 @@ video {
 .menu-top-area .login-register a,
 .t-h-dropdown a {
   color: #505050;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   text-decoration: none;
 }

@@ -138,6 +138,34 @@
             max-width: 100% !important;
             width: 100% !important;
         }
+
+        .site-header > .navbar {
+            display: none !important;
+        }
+
+        @media (min-width: 992px) {
+            .site-header .site-branding {
+                padding-bottom: 28px;
+                padding-top: 28px;
+            }
+
+            .site-header .header-inline-menu {
+                align-items: center;
+                display: flex !important;
+                flex: 1 1 auto;
+                justify-content: center;
+                min-width: 0;
+            }
+
+            .site-header .header-inline-menu .site-menu {
+                width: auto;
+            }
+
+            .site-header .header-inline-menu .site-menu > ul {
+                margin: 0;
+                padding: 0;
+            }
+        }
     </style>
 
     @yield('pagestyles')
@@ -314,44 +342,12 @@ body_theme4 @endif
                                     href="{{ route('front.index') }}"><img
                                         src="{{ asset('storage/images/' . ($setting->logo ?: 'placeholder.png')) }}"
                                         alt="{{ $setting->title }}"></a></div>
-                            <!-- Search / Categories-->
-                            <div class="search-box-wrap d-none d-lg-block d-flex">
-                                <div class="search-box-inner align-self-center">
-                                    <div class="search-box d-flex">
-                                        <select name="category" id="category_select" class="categoris">
-                                            <option value="">{{ $homeLabel('All') }}</option>
-                                            @foreach (DB::table('categories')->whereStatus(1)->get() as $category)
-                                                <option value="{{ $category->slug }}">{{ $category->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <form class="input-group" id="header_search_form"
-                                            action="{{ route('front.catalog') }}" method="get">
-                                            <input type="hidden" name="category" value=""
-                                                id="search__category">
-                                            <span class="input-group-btn">
-                                                <button type="submit"><i class="icon-search"></i></button>
-                                            </span>
-                                            <input class="form-control" type="text"
-                                                data-target="{{ route('front.search.suggest') }}"
-                                                id="__product__search" name="search"
-                                                placeholder="{{ $homeLabel('Search by product name') }}">
-                                            <div class="serch-result d-none">
-                                                {{-- search result --}}
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                                <span class="d-block d-lg-none close-m-serch"><i class="icon-x"></i></span>
-                            </div>
+                            <nav class="header-inline-menu d-none d-lg-flex" aria-label="{{ $homeLabel('Navigation') }}">
+                                @include('master.inc.site-menu')
+                            </nav>
                             <!-- Toolbar-->
                             <div class="toolbar d-flex">
 
-                                <div class="toolbar-item close-m-serch visible-on-mobile"><a href="#">
-                                        <div>
-                                            <i class="icon-search"></i>
-                                        </div>
-                                    </a>
-                                </div>
                                 <div class="toolbar-item visible-on-mobile mobile-menu-toggle"><a href="#">
                                         <div><i class="icon-menu"></i><span
                                                 class="text-label">{{ $homeLabel('Menu') }}</span></div>

@@ -1,17 +1,46 @@
 @font-face {
-    font-family: 'Amar Sonar Bangla';
-    src: url('../fonts/JashirAbhyuday%20%281%29/Unicode/Li%20Jashir%20Abhyuday%20Unicode.ttf') format('truetype');
-    font-display: swap;
-    font-style: normal;
+    font-family: 'SirajeeMisbah';
+    src: url('/fonts/SirajeeMisbah/Unicode/Li Sirajee Misbah Unicode.ttf') format('truetype');
     font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/*
+ * Sirajee Misbah's Unicode TTF contains a malformed U+09DF glyph.
+ * Use a Unicode Bengali system face only for য় and its combining marks.
+ */
+@font-face {
+    font-family: 'BanglaYGlyphFix';
+    src: local('Nirmala UI'), local('Noto Sans Bengali');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+09DF, U+09BC, U+09BE-09CC, U+09D7, U+200C-200D;
+}
+
+:root {
+    --frontend-bangla-font: 'BanglaYGlyphFix', 'SirajeeMisbah', 'Noto Serif Bengali', 'Noto Sans Bengali', sans-serif;
 }
 
 body,
 button,
 input,
 select,
-textarea {
-    font-family: 'Amar Sonar Bangla', sans-serif;
+textarea,
+.navbar,
+.site-header,
+.site-menu,
+.hero-section,
+.home-hero-slider,
+.home-title,
+.home-content,
+.card-title,
+.card-text,
+.section-title,
+.heritage-community-section,
+.home-latest-blog-section {
+    font-family: var(--frontend-bangla-font);
 }
 
 body {
@@ -41,6 +70,39 @@ body :where(
     th,
     td,
     figcaption
-):not([class^="icon-"]):not([class*=" icon-"]):not(.fa):not(.fas):not(.far):not(.fab) {
-    font-family: 'Amar Sonar Bangla', sans-serif !important;
+):not(.fa):not(.fas):not(.far):not(.fal):not(.fab):not(.feather):not([class^="icon-"]):not([class*=" icon-"]):not([class^="flaticon"]):not([class*=" flaticon"]) {
+    font-family: var(--frontend-bangla-font) !important;
+}
+
+.bangla-text,
+.navbar,
+.site-header,
+.site-menu,
+.hero-section,
+.home-hero-title,
+.home-hero-highlight,
+.home-hero-description,
+.home-hero-values,
+.home-hero-btn,
+.card-title,
+.card-text,
+.section-title,
+.heritage-community-section,
+.home-latest-blog-section {
+    font-feature-settings: normal !important;
+    letter-spacing: normal !important;
+    text-rendering: optimizeLegibility;
+    text-transform: none !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+.site-header :where(h1, h2, h3, h4, h5, h6, p, a, span, strong, small, label, li, button),
+.recent-blog-home :where(h1, h2, h3, h4, h5, h6, p, a, span, strong, small, label, li, button),
+.heritage-community-section :where(h1, h2, h3, h4, h5, h6, p, a, span, strong, small, label, li, button),
+.home-latest-blog-section :where(h1, h2, h3, h4, h5, h6, p, a, span, strong, small, label, li, button) {
+    font-feature-settings: normal !important;
+    letter-spacing: normal !important;
+    text-rendering: optimizeLegibility;
+    text-transform: none !important;
+    -webkit-font-smoothing: antialiased;
 }

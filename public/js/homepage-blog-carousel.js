@@ -168,8 +168,6 @@
                 });
             });
 
-            slider.addEventListener('mouseenter', stopAutoplay);
-            slider.addEventListener('mouseleave', startAutoplay);
             slider.addEventListener('focusin', stopAutoplay);
             slider.addEventListener('focusout', startAutoplay);
             slider.addEventListener('keydown', function (event) {

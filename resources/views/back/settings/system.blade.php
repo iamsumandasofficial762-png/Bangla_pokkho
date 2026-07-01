@@ -466,6 +466,10 @@
                                                 </div>
 
                                                 <div id="seo" class="tab-pane"><br>
+                                                    @php
+                                                        $metaImageFile = basename((string) $setting->meta_image);
+                                                        $metaImageExists = $metaImageFile && file_exists(public_path('storage/images/' . $metaImageFile));
+                                                    @endphp
 
                                                     <div class="row justify-content-center">
 
@@ -475,22 +479,33 @@
                                                                 <label
                                                                     for="name">{{ __('Meta Image') }}</label>
                                                                 <div class="col-lg-12 pb-1">
-                                                                    <img class="admin-setting-img"
-                                                                        src="{{ $setting->meta_image ? url('storage/images/' . $setting->meta_image) : url('storage/images/placeholder.png') }}"
-                                                                        alt="No Image Found">
+                                                                    <img id="meta-image-preview"
+                                                                        class="admin-setting-img {{ $metaImageExists ? '' : 'd-none' }}"
+                                                                        src="{{ $metaImageExists ? asset('storage/images/' . $metaImageFile) : '' }}"
+                                                                        alt="{{ __('Meta image preview') }}">
+                                                                    <div id="meta-image-empty"
+                                                                        class="text-muted {{ $metaImageExists ? 'd-none' : '' }}">
+                                                                        {{ __('No Image Found') }}
+                                                                    </div>
                                                                 </div>
                                                                 <span>{{ __('Image Size Should Be 1200 x 627.') }}</span>
                                                             </div>
 
                                                             <div class="form-group position-relative ">
                                                                 <label class="file">
-                                                                    <input type="file" accept="image/*"
+                                                                    <input type="file"
+                                                                        accept=".jpg,.jpeg,.png,.webp,.svg,image/jpeg,image/png,image/webp,image/svg+xml"
                                                                         class="upload-photo"
-                                                                        name="meta_image" id="file"
+                                                                        name="meta_image" id="meta-image-file"
+                                                                        data-media-preview="#meta-image-preview"
+                                                                        data-media-empty="#meta-image-empty"
                                                                         aria-label="File browser example">
                                                                     <span
                                                                         class="file-custom text-left">{{ __('Upload Image...') }}</span>
                                                                 </label>
+                                                                @error('meta_image')
+                                                                    <small class="text-danger d-block">{{ $message }}</small>
+                                                                @enderror
                                                             </div>
 
                                                         </div>
@@ -1146,6 +1161,7 @@
                 var previewUrl = URL.createObjectURL(file);
                 preview.attr('src', previewUrl).removeClass('d-none');
                 emptyState.addClass('d-none');
+                $(this).siblings('.file-custom').text(file.name);
 
                 preview.one('load', function() {
                     URL.revokeObjectURL(previewUrl);
@@ -1155,6 +1171,10 @@
             @if ($errors->hasAny(['logo', 'favicon', 'loader']))
                 $('a[href="#media"]').tab('show');
                 $('a[href="#{{ $errors->has('favicon') ? 'favicon' : ($errors->has('loader') ? 'loader' : 'logo') }}"]').tab('show');
+            @endif
+
+            @if ($errors->has('meta_image'))
+                $('a[href="#seo"]').tab('show');
             @endif
         });
     </script>

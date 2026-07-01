@@ -35,21 +35,21 @@
                     aria-label="হোম ব্যানার" aria-roledescription="carousel">
                     <div class="home-hero-track">
                         <article class="home-hero-slide is-active" data-home-hero-slide aria-hidden="false">
-                            <img src="{{ asset('storage/images/slider-1.png') }}"
+                            <img src="{{ asset('storage/images/slider-3.png') }}"
                                 alt="বাংলা পক্ষ ব্যানার"
                                 fetchpriority="high">
                             <span class="home-hero-overlay" aria-hidden="true"></span>
                             <div class="home-hero-content">
-                                <h2 class="home-hero-title">বাংলা ভাষা, বাংলা সংস্কৃতি</h2>
-                                <p class="home-hero-highlight">বাংলার অধিকার আমাদের অঙ্গীকার</p>
-                                <p class="home-hero-description">আমরা বাঙালির ভাষার অধিকার, সাংস্কৃতিক সচেতনতা এবং ন্যায্য প্রতিনিধিত্বকে গুরুত্ব দিই।</p>
+                                <h2 class="home-hero-title">বাংলার ভবিষ্যৎ গড়ার পথে</h2>
+                                <p class="home-hero-highlight">একসঙ্গে বাংলা, শক্তিশালী বাংলা</p>
+                                <p class="home-hero-description">আমরা বিশ্বাস করি, ভাষা আমাদের পরিচয়, সংস্কৃতি আমাদের আত্মা, আর অধিকার আমাদের শক্তি।<br>একসাথে এগিয়ে চলি ন্যায়, মর্যাদা ও সমৃদ্ধির বাংলার জন্য।</p>
                                 <a class="home-hero-btn" href="{{ route('front.page', 'about-us') }}">
-                                    আরও জানুন <span aria-hidden="true">&rarr;</span>
+                                    আমাদের সাথে যুক্ত হন <span aria-hidden="true">&rarr;</span>
                                 </a>
                             </div>
                         </article>
                         <article class="home-hero-slide" data-home-hero-slide aria-hidden="true">
-                            <img src="{{ asset('storage/images/slider-2.png') }}"
+                            <img src="{{ asset('storage/images/slider-1.png') }}"
                                 alt="বাংলা পক্ষ ব্যানার"
                                 loading="lazy">
                             <span class="home-hero-overlay" aria-hidden="true"></span>
@@ -63,7 +63,7 @@
                             </div>
                         </article>
                         <article class="home-hero-slide" data-home-hero-slide aria-hidden="true">
-                            <img src="{{ asset('storage/images/slider-3.png') }}"
+                            <img src="{{ asset('storage/images/slider-2.png') }}"
                                 alt="বাংলা পক্ষ ব্যানার"
                                 loading="lazy">
                             <span class="home-hero-overlay" aria-hidden="true"></span>
@@ -94,6 +94,25 @@
                             aria-label="দ্বিতীয় ব্যানার" aria-current="false"></button>
                         <button type="button" data-home-hero-dot="2"
                             aria-label="তৃতীয় ব্যানার" aria-current="false"></button>
+                    </div>
+
+                    <div class="home-hero-values" aria-label="বাংলা পক্ষের মূল্যবোধ">
+                        <div class="home-hero-value">
+                            <span class="home-hero-value-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+                            <div><strong>একতা</strong><small>বাঙালির ঐক্যই আমাদের সবচেয়ে বড় শক্তি</small></div>
+                        </div>
+                        <div class="home-hero-value">
+                            <span class="home-hero-value-icon"><i class="fas fa-book-open" aria-hidden="true"></i></span>
+                            <div><strong>ভাষা</strong><small>বাংলা ভাষার সম্মান রক্ষা আমাদের দায়িত্ব</small></div>
+                        </div>
+                        <div class="home-hero-value">
+                            <span class="home-hero-value-icon"><i class="fas fa-fist-raised" aria-hidden="true"></i></span>
+                            <div><strong>অধিকার</strong><small>ন্যায্য অধিকার আদায়ে আমরা সোচ্চার ও অটল</small></div>
+                        </div>
+                        <div class="home-hero-value">
+                            <span class="home-hero-value-icon"><i class="fas fa-seedling" aria-hidden="true"></i></span>
+                            <div><strong>সংস্কৃতি</strong><small>বাংলার সংস্কৃতি ও ঐতিহ্য আমাদের গর্ব</small></div>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -168,10 +187,10 @@
         @include('front.includes.heritage-community', ['heritageSection' => $heritageSection])
     @endif
 
-    @if (!empty($carouselSection['enabled']) && $carouselPosts->isNotEmpty())
-        @include('front.includes.home-blog-carousel', [
-            'posts' => $carouselPosts,
-            'carouselSection' => $carouselSection,
+    @if (!empty($latestSection['enabled']))
+        @include('front.includes.home-latest-blog', [
+            'latestBlogs' => $latestBlogs,
+            'latestSection' => $latestSection,
         ])
     @endif
 
@@ -179,10 +198,10 @@
         @include('front.includes.home-faq', ['faqSection' => $faqSection])
     @endif
 
-    @if (!empty($latestSection['enabled']))
-        @include('front.includes.home-latest-blog', [
-            'latestBlogs' => $latestBlogs,
-            'latestSection' => $latestSection,
+    @if (!empty($carouselSection['enabled']) && $carouselPosts->isNotEmpty())
+        @include('front.includes.home-blog-carousel', [
+            'posts' => $carouselPosts,
+            'carouselSection' => $carouselSection,
         ])
     @endif
 @endsection

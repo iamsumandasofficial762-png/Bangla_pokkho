@@ -67,7 +67,7 @@ class FrontendController extends Controller
         $latestConfig = $homeSections['all_blog_section'];
 
         $carouselPosts = HomePageContent::postsFor($carouselConfig, (int) ($carouselConfig['post_count'] ?? 3));
-        $latestBlogs = HomePageContent::postsFor($latestConfig, (int) ($latestConfig['post_count'] ?? 3));
+        $latestBlogs = HomePageContent::postsFor($latestConfig, 8);
         $blogCategories = \App\Models\Bcategory::whereStatus(1)
             ->orderBy('name')
             ->get(['id', 'name']);

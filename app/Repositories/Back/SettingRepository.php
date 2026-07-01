@@ -21,8 +21,8 @@ class SettingRepository
         $data = Setting::find(1);
         $input = $request->all();
 
-        $media_files = ['logo', 'favicon', 'loader'];
-        $image_files = ['feature_image', 'announcement', 'footer_gateway_img', 'maintainance_image', 'meta_image'];
+        $media_files = ['logo', 'favicon', 'loader', 'meta_image'];
+        $image_files = ['feature_image', 'announcement', 'footer_gateway_img', 'maintainance_image'];
         $new_media_files = [];
         $old_media_files = [];
 
