@@ -29,16 +29,29 @@
 
     // IMAGE UPLOADING :)
     $(".upload-photo").on("change", function (e) {
-        var path = $(this).parent().parent().prev().find('img');
+        var target = $(this).data("preview-target");
+        var path = target
+            ? $(target)
+            : $(this).closest(".card-body").find("img.admin-img").first();
+
+        if (!path.length) {
+            path = $(this).parent().parent().prev().find("img");
+        }
+
         readURL(this, path);
     });
 
     function readURL(input, path) {
         if (input.files && input.files[0]) {
+            if (!input.files[0].type.match(/^image\//)) {
+                input.value = "";
+                return;
+            }
+
             var reader = new FileReader();
             reader.onload = function (e) {
-                path.attr('src', e.target.result);
-            }
+                path.attr("src", e.target.result).removeClass("d-none");
+            };
             reader.readAsDataURL(input.files[0]);
         }
     }

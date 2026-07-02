@@ -52,11 +52,12 @@
                         <label class="d-block">{{ __('Featured Image') }} *</label>
                     </div>
                     <div class="form-group pb-0 pt-0 mt-0 mb-0">
-                    <img class="admin-img lg" src="" >
+                    <img id="featured-image-preview" class="admin-img lg" src="" alt="{{ __('Featured Image') }}">
                     </div>
                     <div class="form-group position-relative ">
                         <label class="file">
-                            <input type="file"  accept="image/*"   class="upload-photo" name="photo"
+                            <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" class="upload-photo" name="photo"
+                                data-preview-target="#featured-image-preview"
                                 id="file"  aria-label="File browser example">
                             <span
                                 class="file-custom text-left">{{ __('Upload Image...') }}</span>

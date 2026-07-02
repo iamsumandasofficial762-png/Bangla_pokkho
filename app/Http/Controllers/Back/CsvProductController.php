@@ -176,7 +176,7 @@ class CsvProductController extends Controller
                     $images_name = $this->uploadImage($line[16], 'images');
                     
 
-                    $input['photo'] = $images_name[1];
+                    $input['photo'] = $images_name[0];
                     $input['thumbnail'] = $images_name[1];
 
 
@@ -211,20 +211,20 @@ class CsvProductController extends Controller
         if ($file) {
 
             if ($delete) {
-                Storage::delete($path . '/' . $delete);
+                ImageHelper::deleteStorageFile($path . '/' . $delete);
             }
 
             $photoName = 'OM_' . time() .  Str::random(8) . '.png';
             $thumbnailName = 'OM_' . time() .  Str::random(8) . '.png';
 
-            Storage::putFileAs($path, $file, $photoName);
-
-
-            $image = \Image::make($file)->resize(230, 230);
-
-
+            $image = Image::make($file);
+            $photoPath = $path . '/' . $photoName;
             $thumbnailPath = $path . '/' . $thumbnailName;
-            Storage::put($thumbnailPath, (string) $image->encode());
+
+            Storage::put($photoPath, (string) $image->encode('png'));
+            Storage::put($thumbnailPath, (string) $image->resize(230, 230)->encode('png'));
+            ImageHelper::syncStorageFileToPublic($photoPath);
+            ImageHelper::syncStorageFileToPublic($thumbnailPath);
 
 
             return [$photoName, $thumbnailName];

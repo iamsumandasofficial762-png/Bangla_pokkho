@@ -2,6 +2,18 @@
 @section('styles')
     <link rel="stylesheet" href="{{asset('assets/back/css/select2.css')}}">
     <link rel="stylesheet" href="{{asset('assets/back/css/datepicker.css')}}">
+    <style>
+        .campaign-product-form {
+            width: 100%;
+        }
+
+        .campaign-product-selector > .select2-container {
+            display: block;
+            max-width: 100%;
+            min-width: 0;
+            width: 100% !important;
+        }
+    </style>
 @endsection
 @section('content')
 
@@ -63,27 +75,32 @@
         <div class="card-header">
             <h4 class="card-title">{{__('Product Added for Campaign')}}</h4>
             <div class="row">
-                <form action="{{route('back.campaign.store')}}" method="POST">
-                    @csrf
-                    <div class="col-md-6">
-                        <div class="form-group ">
-                            <select id="basic" name="item_id" class="form-control" >
-                                <option value="" disabled selected>{{__('Select Product')}}</option>
-                                @foreach ($datas as $item)
-                                    <option value="{{$item->id}}">{{$item->name}}</option>
-                                @endforeach
-                            </select>
-                            @error('item_id')
-                                <p class="text-danger">{{$message}}</p>
-                            @endif
+                <div class="col-12">
+                    <form class="campaign-product-form" action="{{route('back.campaign.store')}}" method="POST">
+                        @csrf
+                        <div class="row align-items-end">
+                            <div class="col-lg-6 col-md-8">
+                                <div class="form-group campaign-product-selector">
+                                    <label for="campaign-product">{{ __('Select Product') }}</label>
+                                    <select id="campaign-product" name="item_id" class="form-control" style="width: 100%">
+                                        <option value="" disabled selected>{{__('Select Product')}}</option>
+                                        @foreach ($datas as $item)
+                                            <option value="{{$item->id}}">{{$item->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('item_id')
+                                        <p class="text-danger">{{$message}}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-auto">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">{{__('Add To Campaign')}}</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">{{__('Add To Campaign')}}</button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
        
@@ -201,8 +218,10 @@
 @section('scripts')
     <script type="" src="{{asset('assets/back/js/select2.js')}}"></script>
     <script>
-        $('#basic').select2({
-			theme: "bootstrap"
+        $('#campaign-product').select2({
+			theme: "bootstrap",
+            width: "100%",
+            dropdownAutoWidth: false
 		});
     </script>
 @endsection

@@ -1,395 +1,329 @@
 @extends('master.back')
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('assets/back/css/select2.css') }}">
-    <style>
-        .home-editor-nav .nav-link { border: 1px solid #e5e7eb; border-radius: 0; color: #343a40; margin-bottom: 0; padding: 14px 18px; text-align: center; }
-        .home-editor-nav .nav-link + .nav-link { border-top: 0; }
-        .home-editor-nav .nav-link.active { background: #377dff; border-color: #377dff; color: #fff; }
-        .home-editor-card { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 18px; padding: 18px; }
-        .home-editor-card h5 { font-weight: 700; margin-bottom: 16px; }
-        .home-editor-grid { display: grid; gap: 0; grid-template-columns: 1fr; }
-        .home-editor-panel { margin: 0 auto; max-width: 730px; }
-        .home-editor-panel .form-group { margin-bottom: 20px; }
-        .home-image-preview { background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 8px; display: inline-flex; min-height: 92px; min-width: 150px; overflow: hidden; }
-        .home-image-preview:empty { display: none; }
-        .home-image-preview img { display: block; height: 92px; object-fit: cover; width: 150px; }
-        .home-upload { border: 1px dashed rgba(219, 0, 0, .45); border-radius: 8px; padding: 12px; }
-        .home-upload-box { align-items: center; background: #fff; border: 1px dashed rgba(219, 0, 0, .45); border-radius: 8px; cursor: pointer; display: flex; gap: 14px; margin-top: 12px; min-height: 86px; padding: 16px; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
-        .home-upload-box:hover, .home-upload-box:focus-within, .home-upload-box.is-dragover { background: rgba(219, 0, 0, .035); border-color: #db0000; box-shadow: 0 0 0 4px rgba(219, 0, 0, .08); }
-        .home-upload-icon { align-items: center; background: rgba(219, 0, 0, .1); border-radius: 50%; color: #db0000; display: inline-flex; flex: 0 0 44px; height: 44px; justify-content: center; width: 44px; }
-        .home-upload-title { color: #1f2937; display: block; font-weight: 700; }
-        .home-upload-help, .home-upload-file { color: #6b7280; display: block; font-size: 12px; line-height: 1.5; }
-        .home-upload .home-image-input { height: 1px; opacity: 0; overflow: hidden; position: absolute; width: 1px; }
-        .home-repeat-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 14px; padding: 14px; }
-        .home-repeat-head { align-items: center; display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .home-toggle { align-items: center; display: flex; gap: 8px; margin-bottom: 18px; }
-        .home-editor-help { color: #6c757d; font-size: 12px; }
-        .home-editor-actions { border-top: 1px solid #e5e7eb; margin-top: 26px; padding-top: 24px; text-align: center; }
-        .home-editor-panel .select2-container--bootstrap .select2-selection {
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            box-shadow: none;
-            min-height: 44px;
-            padding: 4px 8px;
-        }
-        .home-editor-panel .select2-container--bootstrap.select2-container--focus .select2-selection,
-        .home-editor-panel .select2-container--bootstrap.select2-container--open .select2-selection {
-            border-color: #377dff;
-            box-shadow: 0 0 0 3px rgba(55, 125, 255, .12);
-        }
-        .home-editor-panel .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
-            background: #f8fafc;
-            border: 1px solid #dbe3ef;
-            border-radius: 999px;
-            color: #1f2937;
-            font-size: 12px;
-            margin: 4px 6px 4px 0;
-            padding: 5px 12px 5px 8px;
-        }
-        .home-editor-panel .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove {
-            align-items: center;
-            background: #e5e7eb;
-            border-radius: 50%;
-            color: #374151;
-            display: inline-flex;
-            font-size: 14px;
-            font-weight: 700;
-            height: 18px;
-            justify-content: center;
-            line-height: 1;
-            margin-right: 7px;
-            opacity: 1;
-            text-align: center;
-            width: 18px;
-        }
-        .home-editor-panel .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove:hover {
-            background: #db0000;
-            color: #fff;
-        }
-        .home-editor-panel .select2-container--bootstrap .select2-search--inline .select2-search__field {
-            margin-top: 7px;
-        }
-        @media (max-width: 767px) { .home-editor-nav { margin-bottom: 20px; } }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/back/css/hero-slider-manager.css') }}?v={{ filemtime(public_path('assets/back/css/hero-slider-manager.css')) }}">
 @endsection
 
 @section('content')
-@php
-    $imageUrl = function ($image) {
-        return $image && file_exists(public_path('storage/images/' . $image))
-            ? url('storage/images/' . $image)
-            : null;
-    };
-    $selected = fn ($ids, $id) => in_array($id, array_map('intval', (array) $ids)) ? 'selected' : '';
-@endphp
+    @php
+        $editing = $selectedSlider->exists;
+        $value = fn (string $field, $default = '') => old($field, $selectedSlider->{$field} ?? $default);
+        $enabled = old('enabled', $selectedSlider->status !== 'inactive');
+        $overlayEnabled = old('overlay_enabled', $selectedSlider->overlay_enabled ?? true);
+        $imageUrl = $editing ? $selectedSlider->background_image_url : '';
+        $icons = [
+            'bi-people', 'bi-book', 'bi-megaphone', 'bi-tree', 'bi-heart', 'bi-star', 'bi-globe',
+            'bi-shield-check', 'bi-lightbulb', 'bi-flag', 'fas fa-users', 'fas fa-book-open',
+            'fas fa-fist-raised', 'fas fa-seedling', 'fas fa-heart', 'fas fa-star', 'fas fa-globe',
+            'fas fa-shield-alt', 'fas fa-lightbulb', 'fas fa-flag',
+        ];
+    @endphp
 
-<div class="container-fluid">
-    <div class="card mb-4">
-        <div class="card-body">
-            <h3 class="mb-0 bc-title"><b>{{ __('Home Page') }}</b></h3>
-        </div>
-    </div>
-
-    <form class="admin-form" action="{{ route('back.homePage.update') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        @include('alerts.alerts')
-
-        <div class="card shadow mb-4">
-            <div class="card-body">
-                <div class="row justify-content-center">
-                    <div class="col-lg-3 col-md-4">
-                        <div class="nav flex-column nav-pills home-editor-nav" role="tablist">
-                            <a class="nav-link active" data-toggle="pill" href="#recent-blog">Recent Blog</a>
-                            <a class="nav-link" data-toggle="pill" href="#about-section">About Bangla Pokkho</a>
-                            <a class="nav-link" data-toggle="pill" href="#heritage-section">Heritage & Initiatives</a>
-                            <a class="nav-link" data-toggle="pill" href="#blog-carousel">Slider blogs</a>
-                            <a class="nav-link" data-toggle="pill" href="#faq-section">FAQ</a>
-                            <a class="nav-link" data-toggle="pill" href="#all-blog-section">Latest Posts</a>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-7 col-md-8">
-                        <div class="tab-content home-editor-panel">
-                            <div class="tab-pane fade show active" id="recent-blog">
-                                @php $section = $sections['recent_blog']; @endphp
-                                <div class="home-toggle">
-                                    <input type="checkbox" name="sections[recent_blog][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}>
-                                    <strong>Enable Section</strong>
-                                </div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[recent_blog][label]" value="{{ $section['label'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[recent_blog][heading]" value="{{ $section['heading'] ?? '' }}"></div>
-                                    <div class="form-group"><label>View All Text</label><input class="form-control" name="sections[recent_blog][view_all_text]" value="{{ $section['view_all_text'] ?? '' }}"></div>
-                                </div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group">
-                                        <label>Post Mode</label>
-                                        <select class="form-control" name="sections[recent_blog][post_mode]">
-                                            <option value="latest" {{ ($section['post_mode'] ?? '') === 'latest' ? 'selected' : '' }}>Latest automatically</option>
-                                            <option value="manual" {{ ($section['post_mode'] ?? '') === 'manual' ? 'selected' : '' }}>Manual selected posts</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Large Featured Post</label>
-                                        <select class="form-control select2" name="sections[recent_blog][featured_post_id]">
-                                            <option value="">Latest first post</option>
-                                            @foreach($posts as $post)
-                                                <option value="{{ $post->id }}" {{ (int)($section['featured_post_id'] ?? 0) === $post->id ? 'selected' : '' }}>{{ $post->title }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Small Post Selection</label>
-                                    <select class="form-control select2" name="sections[recent_blog][post_ids][]" multiple>
-                                        @foreach($posts as $post)
-                                            <option value="{{ $post->id }}" {!! $selected($section['post_ids'] ?? [], $post->id) !!}>{{ $post->title }}</option>
-                                        @endforeach
-                                    </select>
-                                    <span class="home-editor-help">Leave empty to show the latest posts.</span>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="about-section">
-                                @php $section = $sections['about_section']; @endphp
-                                <div class="home-toggle"><input type="checkbox" name="sections[about_section][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>Subtitle</label><input class="form-control" name="sections[about_section][subtitle]" value="{{ $section['subtitle'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[about_section][heading]" value="{{ $section['heading'] ?? '' }}"></div>
-                                </div>
-                                <div class="form-group"><label>Description</label><textarea class="form-control" rows="4" name="sections[about_section][description]">{{ $section['description'] ?? '' }}</textarea></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group home-upload">
-                                        <label>Main Image</label><br>
-                                        <span class="home-image-preview">@if($imageUrl($section['main_image'] ?? null))<img src="{{ $imageUrl($section['main_image']) }}" data-preview-target="main_image">@endif</span>
-                                        <input type="file" class="form-control-file mt-2 home-image-input" name="images[about_section][main_image]" accept="image/jpeg,image/png,image/webp">
-                                    </div>
-                                </div>
-                                <h5>Tabs</h5>
-                                @foreach(($section['tabs'] ?? []) as $index => $tab)
-                                    <div class="home-repeat-item">
-                                        <input type="hidden" name="sections[about_section][tabs][{{ $index }}][key]" value="{{ $tab['key'] ?? 'tab' . $index }}">
-                                        <div class="home-editor-grid">
-                                            <div class="form-group"><label>Tab Name</label><input class="form-control" name="sections[about_section][tabs][{{ $index }}][name]" value="{{ $tab['name'] ?? '' }}"></div>
-                                            <div class="form-group"><label>Title</label><input class="form-control" name="sections[about_section][tabs][{{ $index }}][title]" value="{{ $tab['title'] ?? '' }}"></div>
-                                        </div>
-                                        <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[about_section][tabs][{{ $index }}][description]">{{ $tab['description'] ?? '' }}</textarea></div>
-                                        <div class="form-group"><label>Bullet points, one per line</label><textarea class="form-control" rows="3" name="sections[about_section][tabs][{{ $index }}][bullets]">{{ implode("\n", $tab['bullets'] ?? []) }}</textarea></div>
-                                        <div class="form-group home-upload">
-                                            <label>Tab Image/Icon</label><br>
-                                            <span class="home-image-preview">@if($imageUrl($tab['image'] ?? null))<img src="{{ $imageUrl($tab['image']) }}">@endif</span>
-                                            <input type="file" class="form-control-file mt-2 home-image-input" name="images[about_section][tabs][{{ $index }}][image]" accept="image/jpeg,image/png,image/webp">
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            <div class="tab-pane fade" id="heritage-section">
-                                @php $section = $sections['heritage_cards']; @endphp
-                                <div class="home-toggle"><input type="checkbox" name="sections[heritage_cards][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[heritage_cards][label]" value="{{ $section['label'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[heritage_cards][heading]" value="{{ $section['heading'] ?? '' }}"></div>
-                                </div>
-                                <div class="form-group"><label>Description</label><textarea class="form-control" rows="3" name="sections[heritage_cards][description]">{{ $section['description'] ?? '' }}</textarea></div>
-                                <h5>Cards</h5>
-                                <div data-repeater="heritage-cards">
-                                    <div class="home-repeat-list">
-                                @foreach(($section['cards'] ?? []) as $index => $card)
-                                    <div class="home-repeat-item">
-                                        <div class="home-repeat-head"><strong>Card {{ $index + 1 }}</strong></div>
-                                        <div class="home-editor-grid">
-                                            <div class="form-group"><label>Title</label><input class="form-control" name="sections[heritage_cards][cards][{{ $index }}][title]" value="{{ $card['title'] ?? '' }}"></div>
-                                            <div class="form-group"><label>Icon class</label><input class="form-control" name="sections[heritage_cards][cards][{{ $index }}][icon]" value="{{ $card['icon'] ?? '' }}"></div>
-                                            <div class="form-group"><label>Button Text</label><input class="form-control" name="sections[heritage_cards][cards][{{ $index }}][button_text]" value="{{ $card['button_text'] ?? '' }}"></div>
-                                        </div>
-                                        <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[heritage_cards][cards][{{ $index }}][description]">{{ $card['description'] ?? '' }}</textarea></div>
-                                        <div class="form-group home-upload"><label>Image</label><br><span class="home-image-preview">@if($imageUrl($card['image'] ?? null))<img src="{{ $imageUrl($card['image']) }}">@endif</span><input type="file" class="form-control-file mt-2 home-image-input" name="images[heritage_cards][cards][{{ $index }}][image]" accept="image/jpeg,image/png,image/webp"></div>
-                                    </div>
-                                @endforeach
-                                    </div>
-                                </div>
-                                <h5>Bottom Feature Strip</h5>
-                                <div data-repeater="heritage-features">
-                                    <div class="home-repeat-list">
-                                @foreach(($section['features'] ?? []) as $index => $feature)
-                                    <div class="home-repeat-item">
-                                        <div class="home-repeat-head"><strong>Feature</strong></div>
-                                        <div class="home-editor-grid">
-                                            <div class="form-group"><label>Icon class</label><input class="form-control" name="sections[heritage_cards][features][{{ $index }}][icon]" value="{{ $feature['icon'] ?? '' }}"></div>
-                                            <div class="form-group"><label>Title</label><input class="form-control" name="sections[heritage_cards][features][{{ $index }}][title]" value="{{ $feature['title'] ?? '' }}"></div>
-                                            <div class="form-group"><label>Description</label><input class="form-control" name="sections[heritage_cards][features][{{ $index }}][description]" value="{{ $feature['description'] ?? '' }}"></div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="blog-carousel">
-                                @php $section = $sections['blog_carousel']; @endphp
-                                <div class="home-toggle"><input type="checkbox" name="sections[blog_carousel][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[blog_carousel][label]" value="{{ $section['label'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[blog_carousel][heading]" value="{{ $section['heading'] ?? '' }}"></div>
-                                </div>
-                                <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[blog_carousel][description]">{{ $section['description'] ?? '' }}</textarea></div>
-                                <div class="form-group"><label>View All Text</label><input class="form-control" name="sections[blog_carousel][view_all_text]" value="{{ $section['view_all_text'] ?? '' }}"></div>
-                            </div>
-
-                            <div class="tab-pane fade" id="faq-section">
-                                @php $section = $sections['faq_section']; @endphp
-                                <div class="home-toggle"><input type="checkbox" name="sections[faq_section][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[faq_section][label]" value="{{ $section['label'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[faq_section][heading]" value="{{ $section['heading'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Help Icon</label><input class="form-control" name="sections[faq_section][help_icon]" value="{{ $section['help_icon'] ?? '' }}"></div>
-                                </div>
-                                <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[faq_section][description]">{{ $section['description'] ?? '' }}</textarea></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>Help Title</label><input class="form-control" name="sections[faq_section][help_title]" value="{{ $section['help_title'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Help Subtitle</label><input class="form-control" name="sections[faq_section][help_subtitle]" value="{{ $section['help_subtitle'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Button Text</label><input class="form-control" name="sections[faq_section][help_button_text]" value="{{ $section['help_button_text'] ?? '' }}"></div>
-                                </div>
-                                <div data-repeater="faq">
-                                    <div class="home-repeat-list">
-                                        @foreach(($section['items'] ?? []) as $index => $item)
-                                            <div class="home-repeat-item">
-                                                <div class="home-repeat-head"><strong>FAQ</strong><button type="button" class="btn btn-sm btn-danger" data-remove-repeat>Remove</button></div>
-                                                <div class="form-group"><label>Question</label><input class="form-control" name="sections[faq_section][items][{{ $index }}][question]" value="{{ $item['question'] ?? '' }}"></div>
-                                                <div class="form-group"><label>Answer</label><textarea class="form-control" rows="3" name="sections[faq_section][items][{{ $index }}][answer]">{{ $item['answer'] ?? '' }}</textarea></div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" data-add-repeat="faq">Add More</button>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="all-blog-section">
-                                @php $section = $sections['all_blog_section']; @endphp
-                                <div class="home-toggle"><input type="checkbox" name="sections[all_blog_section][enabled]" value="1" {{ !empty($section['enabled']) ? 'checked' : '' }}> <strong>Enable Section</strong></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>Label</label><input class="form-control" name="sections[all_blog_section][label]" value="{{ $section['label'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Heading</label><input class="form-control" name="sections[all_blog_section][heading]" value="{{ $section['heading'] ?? '' }}"></div>
-                                </div>
-                                <div class="form-group"><label>Description</label><textarea class="form-control" name="sections[all_blog_section][description]">{{ $section['description'] ?? '' }}</textarea></div>
-                                <div class="home-editor-grid">
-                                    <div class="form-group"><label>Search Placeholder</label><input class="form-control" name="sections[all_blog_section][search_placeholder]" value="{{ $section['search_placeholder'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Category Placeholder</label><input class="form-control" name="sections[all_blog_section][category_placeholder]" value="{{ $section['category_placeholder'] ?? '' }}"></div>
-                                    <div class="form-group"><label>Post Mode</label><select class="form-control" name="sections[all_blog_section][post_mode]"><option value="latest" {{ ($section['post_mode'] ?? '') === 'latest' ? 'selected' : '' }}>Latest</option><option value="manual" {{ ($section['post_mode'] ?? '') === 'manual' ? 'selected' : '' }}>Manual</option></select></div>
-                                </div>
-                                <div class="form-group"><label>Post Selection</label><select class="form-control select2" name="sections[all_blog_section][post_ids][]" multiple>@foreach($posts as $post)<option value="{{ $post->id }}" {!! $selected($section['post_ids'] ?? [], $post->id) !!}>{{ $post->title }}</option>@endforeach</select></div>
-                            </div>
-                        </div>
-
-                        <div class="home-editor-actions">
-                            <button type="submit" class="btn btn-secondary">Save Home Page</button>
-                        </div>
-                    </div>
+    <div class="container-fluid hero-manager">
+        <div class="card mb-4">
+            <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
+                <div>
+                    <h3 class="mb-1 bc-title"><b>{{ __('Hero Slider') }}</b></h3>
+                    <p class="text-muted mb-0">{{ __('Manage every visible part of the homepage hero slider.') }}</p>
                 </div>
+                <a class="btn btn-primary mt-2 mt-sm-0" href="{{ route('back.homePage', ['new' => 1]) }}">
+                    <i class="fas fa-plus mr-1"></i>{{ __('Create New Slide') }}
+                </a>
             </div>
         </div>
-    </form>
-</div>
+
+        @include('alerts.alerts')
+
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <strong>{{ __('Please correct the highlighted fields.') }}</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="hero-manager-layout">
+            <aside class="card hero-slide-library">
+                <div class="card-header">
+                    <div>
+                        <h5 class="mb-0">{{ __('Slides') }}</h5>
+                        <small class="text-muted">{{ __('Drag cards to reorder') }}</small>
+                    </div>
+                    <span class="badge badge-light">{{ $sliders->count() }}</span>
+                </div>
+                <div class="card-body p-2">
+                    <div class="hero-slide-list" data-slide-list data-sort-url="{{ route('back.hero-sliders.sort') }}">
+                        @forelse ($sliders as $slider)
+                            <article class="hero-slide-card {{ $editing && $selectedSlider->is($slider) ? 'is-selected' : '' }}"
+                                data-slide-id="{{ $slider->id }}">
+                                <button type="button" class="hero-drag-handle" data-drag-handle
+                                    aria-label="{{ __('Drag to reorder') }}" title="{{ __('Drag to reorder') }}">
+                                    <i class="fas fa-grip-vertical"></i>
+                                </button>
+                                <img src="{{ $slider->background_image_url }}" alt="">
+                                <div class="hero-slide-card-body">
+                                    <a href="{{ route('back.homePage', ['slide' => $slider->id]) }}"
+                                        class="hero-slide-card-title">{{ $slider->title_top }}</a>
+                                    <div class="hero-slide-meta">
+                                        <span class="badge {{ $slider->status === 'active' ? 'badge-success' : 'badge-secondary' }}">
+                                            {{ ucfirst($slider->status) }}
+                                        </span>
+                                        <span>#{{ $slider->sort_order }}</span>
+                                    </div>
+                                    <div class="hero-slide-actions">
+                                        <a class="btn btn-xs btn-outline-primary"
+                                            href="{{ route('back.homePage', ['slide' => $slider->id]) }}"
+                                            title="{{ __('Edit') }}"><i class="fas fa-pen"></i></a>
+                                        <button class="btn btn-xs btn-outline-info" type="button"
+                                            onclick="document.getElementById('duplicate-slide-{{ $slider->id }}').submit()"
+                                            title="{{ __('Duplicate') }}"><i class="far fa-copy"></i></button>
+                                        <button class="btn btn-xs btn-outline-danger" type="button"
+                                            data-delete-slide="delete-slide-{{ $slider->id }}"
+                                            title="{{ __('Delete') }}"><i class="far fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                            </article>
+                        @empty
+                            <div class="hero-empty-state">
+                                <i class="far fa-images"></i>
+                                <p>{{ __('No hero slides yet.') }}</p>
+                                <a href="{{ route('back.homePage', ['new' => 1]) }}">{{ __('Create the first slide') }}</a>
+                            </div>
+                        @endforelse
+                    </div>
+                    <p class="hero-sort-message mb-0" data-sort-message aria-live="polite"></p>
+                </div>
+            </aside>
+
+            <section class="card hero-slide-editor">
+                <form action="{{ $editing ? route('back.hero-sliders.update', $selectedSlider) : route('back.hero-sliders.store') }}"
+                    method="POST" enctype="multipart/form-data" data-hero-form>
+                    @csrf
+                    @if ($editing)
+                        @method('PUT')
+                    @endif
+
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-0">{{ $editing ? __('Edit Slide') : __('New Slide') }}</h5>
+                            <small class="text-muted">{{ __('Recommended background size: 1920×900') }}</small>
+                        </div>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="far fa-save mr-1"></i>{{ $editing ? __('Save Changes') : __('Create Slide') }}
+                        </button>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="hero-form-section">
+                            <div class="hero-section-heading">
+                                <span>01</span>
+                                <div><h6>{{ __('Live Preview') }}</h6><small>{{ __('Updates instantly as you type') }}</small></div>
+                            </div>
+                            <div class="hero-live-preview" data-live-preview>
+                                <img src="{{ $imageUrl }}" alt="" data-preview-image @if (!$imageUrl) hidden @endif>
+                                <div class="hero-preview-placeholder" data-preview-placeholder @if ($imageUrl) hidden @endif>
+                                    <i class="far fa-image"></i><span>{{ __('Choose a background image') }}</span>
+                                </div>
+                                <span class="hero-preview-overlay" data-preview-overlay></span>
+                                <div class="hero-preview-content">
+                                    <div data-preview-title-top>{{ $value('title_top', __('Small Heading')) }}</div>
+                                    <strong data-preview-title>{{ $value('title', __('Main Hero Title')) }}</strong>
+                                    <p data-preview-subtitle>{{ $value('subtitle', __('Subtitle / Description')) }}</p>
+                                    <span class="hero-preview-button" data-preview-button>{{ $value('button_text', __('Button Text')) }} &rarr;</span>
+                                </div>
+                                <div class="hero-preview-features">
+                                    @for ($index = 1; $index <= 4; $index++)
+                                        <div>
+                                            <i class="{{ $value("small_feature_icon_{$index}", 'fas fa-star') }}" data-preview-feature-icon="{{ $index }}"></i>
+                                            <span><b data-preview-feature-title="{{ $index }}">{{ $value("small_feature_title_{$index}", __('Feature') . ' ' . $index) }}</b>
+                                            <small data-preview-feature-description="{{ $index }}">{{ $value("small_feature_description_{$index}") }}</small></span>
+                                        </div>
+                                    @endfor
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hero-form-section">
+                            <div class="hero-section-heading">
+                                <span>02</span><div><h6>{{ __('General Settings') }}</h6></div>
+                            </div>
+                            <div class="hero-field-grid hero-field-grid--3">
+                                <label class="hero-switch-field">
+                                    <input type="hidden" name="enabled" value="0">
+                                    <input type="checkbox" name="enabled" value="1" {{ $enabled ? 'checked' : '' }}>
+                                    <span class="hero-switch"></span>
+                                    <span><b>{{ __('Enable Slide') }}</b><small data-status-label>{{ $enabled ? __('Active') : __('Inactive') }}</small></span>
+                                </label>
+                                <div class="form-group">
+                                    <label for="slide-status">{{ __('Status') }}</label>
+                                    <input id="slide-status" class="form-control" value="{{ $enabled ? __('Active') : __('Inactive') }}" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sort-order">{{ __('Sort Order') }}</label>
+                                    <input id="sort-order" class="form-control @error('sort_order') is-invalid @enderror"
+                                        type="number" min="0" name="sort_order" value="{{ $value('sort_order', 0) }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hero-form-section">
+                            <div class="hero-section-heading">
+                                <span>03</span><div><h6>{{ __('Text Content') }}</h6></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title-top">{{ __('Small Heading') }} *</label>
+                                <input id="title-top" class="form-control @error('title_top') is-invalid @enderror"
+                                    name="title_top" maxlength="150" value="{{ $value('title_top') }}" data-preview-source="title-top" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="hero-title">{{ __('Main Hero Title') }} *</label>
+                                <input id="hero-title" class="form-control @error('title') is-invalid @enderror"
+                                    name="title" maxlength="200" value="{{ $value('title') }}" data-preview-source="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="hero-subtitle">{{ __('Subtitle / Description') }} *</label>
+                                <textarea id="hero-subtitle" class="form-control @error('subtitle') is-invalid @enderror"
+                                    name="subtitle" maxlength="1000" rows="3" data-preview-source="subtitle" required>{{ $value('subtitle') }}</textarea>
+                            </div>
+                            <div class="hero-field-grid">
+                                <div class="form-group">
+                                    <label for="button-text">{{ __('Button Text') }}</label>
+                                    <input id="button-text" class="form-control" name="button_text" maxlength="100"
+                                        value="{{ $value('button_text') }}" data-preview-source="button">
+                                </div>
+                                <div class="form-group">
+                                    <label for="button-link">{{ __('Button URL') }}</label>
+                                    <input id="button-link" class="form-control" name="button_link" maxlength="2048"
+                                        value="{{ $value('button_link') }}" placeholder="/about-us or https://…">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hero-form-section">
+                            <div class="hero-section-heading">
+                                <span>04</span><div><h6>{{ __('Background Image') }}</h6><small>JPG, JPEG, PNG or WebP · {{ __('Maximum 5MB') }}</small></div>
+                            </div>
+                            <div class="hero-upload-zone @error('background_image') has-error @enderror"
+                                data-upload-zone tabindex="0" role="button">
+                                <input type="file" name="background_image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                    data-image-input {{ $editing ? '' : 'required' }}>
+                                <div class="hero-upload-preview" data-upload-preview @if (!$imageUrl) hidden @endif>
+                                    <img src="{{ $imageUrl }}" alt="{{ __('Background preview') }}">
+                                </div>
+                                <div class="hero-upload-copy">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <b>{{ __('Drag & drop an image here') }}</b>
+                                    <span>{{ __('or') }} <u>{{ __('browse files') }}</u></span>
+                                    <small data-file-name>{{ $imageUrl ? basename($selectedSlider->background_image) : __('No file selected') }}</small>
+                                </div>
+                            </div>
+                            <div class="hero-upload-actions">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-browse-image>{{ $imageUrl ? __('Replace Image') : __('Browse') }}</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-remove-image @if (!$imageUrl) hidden @endif>{{ __('Remove Image') }}</button>
+                            </div>
+                        </div>
+
+                        <div class="hero-form-section">
+                            <div class="hero-section-heading">
+                                <span>05</span><div><h6>{{ __('Overlay') }}</h6></div>
+                            </div>
+                            <div class="hero-field-grid hero-field-grid--overlay">
+                                <label class="hero-switch-field">
+                                    <input type="hidden" name="overlay_enabled" value="0">
+                                    <input type="checkbox" name="overlay_enabled" value="1" data-overlay-enabled {{ $overlayEnabled ? 'checked' : '' }}>
+                                    <span class="hero-switch"></span><span><b>{{ __('Overlay Enable') }}</b></span>
+                                </label>
+                                <div class="form-group">
+                                    <label for="overlay-color">{{ __('Overlay Color') }}</label>
+                                    <input id="overlay-color" class="form-control hero-color-input" type="color"
+                                        name="overlay_color" value="{{ $value('overlay_color', '#000000') }}" data-overlay-color>
+                                </div>
+                                <div class="form-group">
+                                    <label for="overlay-opacity">{{ __('Overlay Opacity') }}: <b data-opacity-value>{{ $value('overlay_opacity', 20) }}%</b></label>
+                                    <input id="overlay-opacity" class="custom-range" type="range" min="0" max="100"
+                                        name="overlay_opacity" value="{{ $value('overlay_opacity', 20) }}" data-overlay-opacity>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hero-form-section">
+                            <div class="hero-section-heading">
+                                <span>06</span><div><h6>{{ __('Bottom Feature Boxes') }}</h6><small>{{ __('Select a Bootstrap Icon or FontAwesome icon') }}</small></div>
+                            </div>
+                            <div class="hero-feature-editor-grid">
+                                @for ($index = 1; $index <= 4; $index++)
+                                    <fieldset class="hero-feature-editor">
+                                        <legend>{{ __('Feature') }} {{ $index }}</legend>
+                                        <div class="form-group">
+                                            <label>{{ __('Icon Picker') }}</label>
+                                            <div class="hero-icon-control">
+                                                <button class="hero-current-icon" type="button" data-icon-toggle="{{ $index }}">
+                                                    <i class="{{ $value("small_feature_icon_{$index}", 'fas fa-star') }}"></i>
+                                                </button>
+                                                <input class="form-control" name="small_feature_icon_{{ $index }}"
+                                                    value="{{ $value("small_feature_icon_{$index}", 'fas fa-star') }}"
+                                                    maxlength="100" data-icon-input="{{ $index }}" readonly>
+                                            </div>
+                                            <div class="hero-icon-picker" data-icon-picker="{{ $index }}" hidden>
+                                                @foreach ($icons as $icon)
+                                                    <button type="button" data-icon-class="{{ $icon }}" title="{{ $icon }}">
+                                                        <i class="{{ $icon }}"></i>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>{{ __('Title') }}</label>
+                                            <input class="form-control" name="small_feature_title_{{ $index }}" maxlength="100"
+                                                value="{{ $value("small_feature_title_{$index}") }}" data-feature-title="{{ $index }}">
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label>{{ __('Description') }}</label>
+                                            <textarea class="form-control" name="small_feature_description_{{ $index }}" maxlength="300"
+                                                rows="2" data-feature-description="{{ $index }}">{{ $value("small_feature_description_{$index}") }}</textarea>
+                                        </div>
+                                    </fieldset>
+                                @endfor
+                            </div>
+                        </div>
+
+                        <div class="hero-save-bar">
+                            <span>{{ __('Changes appear on the homepage after saving.') }}</span>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="far fa-save mr-1"></i>{{ $editing ? __('Save Changes') : __('Create Slide') }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        @foreach ($sliders as $slider)
+            <form id="duplicate-slide-{{ $slider->id }}" action="{{ route('back.hero-sliders.duplicate', $slider) }}" method="POST" hidden>@csrf</form>
+            <form id="delete-slide-{{ $slider->id }}" action="{{ route('back.hero-sliders.destroy', $slider) }}" method="POST" hidden>
+                @csrf @method('DELETE')
+            </form>
+        @endforeach
+    </div>
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/back/js/select2.js') }}"></script>
     <script>
-        $('.select2').select2({ theme: 'bootstrap', width: '100%' });
-
-        function renderSelectedImage(input) {
-            var file = input.files && input.files[0];
-            var upload = input.closest('.home-upload');
-            var preview = upload ? upload.querySelector('.home-image-preview') : null;
-            if (!file || !preview) return;
-
-            var status = upload.querySelector('[data-upload-file]');
-            if (status) status.textContent = file.name;
-
-            preview.innerHTML = '';
-            var image = document.createElement('img');
-            image.src = URL.createObjectURL(file);
-            image.onload = function () { URL.revokeObjectURL(image.src); };
-            preview.appendChild(image);
-        }
-
-        function setDroppedFile(input, file) {
-            if (!file || ['image/jpeg', 'image/png', 'image/webp'].indexOf(file.type) === -1) return;
-            var transfer = new DataTransfer();
-            transfer.items.add(file);
-            input.files = transfer.files;
-            renderSelectedImage(input);
-        }
-
-        document.querySelectorAll('.home-image-input').forEach(function (input, index) {
-            if (!input.id) {
-                input.id = 'home-image-input-' + index;
-            }
-
-            var box = document.createElement('label');
-            box.className = 'home-upload-box';
-            box.setAttribute('for', input.id);
-            box.innerHTML =
-                '<span class="home-upload-icon"><i class="fas fa-cloud-upload-alt" aria-hidden="true"></i></span>' +
-                '<span>' +
-                '<span class="home-upload-title">Click to upload image</span>' +
-                '<span class="home-upload-help">Supported formats: JPG, PNG, WEBP</span>' +
-                '<span class="home-upload-file" data-upload-file>No file selected</span>' +
-                '</span>';
-
-            input.parentNode.insertBefore(box, input);
-
-            ['dragenter', 'dragover'].forEach(function (eventName) {
-                box.addEventListener(eventName, function (event) {
-                    event.preventDefault();
-                    box.classList.add('is-dragover');
-                });
-            });
-
-            ['dragleave', 'drop'].forEach(function (eventName) {
-                box.addEventListener(eventName, function (event) {
-                    event.preventDefault();
-                    box.classList.remove('is-dragover');
-                });
-            });
-
-            box.addEventListener('drop', function (event) {
-                if (event.dataTransfer && event.dataTransfer.files.length) {
-                    setDroppedFile(input, event.dataTransfer.files[0]);
-                }
-            });
-        });
-
-        document.querySelectorAll('.home-image-input').forEach(function (input) {
-            input.addEventListener('change', function () {
-                renderSelectedImage(input);
-            });
-        });
-
-        document.addEventListener('change', function (event) {
-            if (!event.target.matches('.home-image-input')) return;
-            renderSelectedImage(event.target);
-        });
-
-        document.addEventListener('click', function (event) {
-            if (event.target.matches('[data-remove-repeat]')) {
-                event.target.closest('.home-repeat-item').remove();
-            }
-
-            if (event.target.matches('[data-add-repeat="faq"]')) {
-                var list = document.querySelector('[data-repeater="faq"] .home-repeat-list');
-                var index = list.querySelectorAll('.home-repeat-item').length;
-                var wrapper = document.createElement('div');
-                wrapper.className = 'home-repeat-item';
-                wrapper.innerHTML =
-                    '<div class="home-repeat-head"><strong>FAQ</strong><button type="button" class="btn btn-sm btn-danger" data-remove-repeat>Remove</button></div>' +
-                    '<div class="form-group"><label>Question</label><input class="form-control" name="sections[faq_section][items][' + index + '][question]"></div>' +
-                    '<div class="form-group"><label>Answer</label><textarea class="form-control" rows="3" name="sections[faq_section][items][' + index + '][answer]"></textarea></div>';
-                list.appendChild(wrapper);
-            }
-
-        });
+        window.heroSliderManager = {
+            csrfToken: @json(csrf_token()),
+            deleteConfirm: @json(__('Delete this hero slide? This cannot be undone.')),
+            sorting: @json(__('Saving order…')),
+            sorted: @json(__('Slide order saved.')),
+            sortFailed: @json(__('Could not save the slide order.')),
+            imageTooLarge: @json(__('The image may not be larger than 5MB.')),
+            imageInvalid: @json(__('Use a JPG, JPEG, PNG, or WebP image.')),
+            active: @json(__('Active')),
+            inactive: @json(__('Inactive'))
+        };
     </script>
+    <script src="{{ asset('assets/back/js/hero-slider-manager.js') }}?v={{ filemtime(public_path('assets/back/js/hero-slider-manager.js')) }}"></script>
 @endsection

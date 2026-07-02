@@ -9,6 +9,42 @@ use Illuminate\Support\Str;
 class ImageHelper
 {
     /**
+     * Publish a file from Laravel's public disk into the web-accessible folder.
+     *
+     * Some legacy installations use a real public/storage directory instead
+     * of Laravel's storage symlink, so both copies must be kept in sync.
+     */
+    public static function syncStorageFileToPublic($relativePath)
+    {
+        $relativePath = ltrim(str_replace('\\', '/', (string) $relativePath), '/');
+
+        if ($relativePath === '' || !Storage::exists($relativePath)) {
+            return false;
+        }
+
+        $source = Storage::path($relativePath);
+        $destination = public_path('storage/' . $relativePath);
+        File::ensureDirectoryExists(dirname($destination));
+
+        if (!File::exists($destination) || realpath($source) !== realpath($destination)) {
+            File::copy($source, $destination);
+        }
+
+        return true;
+    }
+
+    public static function deleteStorageFile($relativePath)
+    {
+        $relativePath = ltrim(str_replace('\\', '/', (string) $relativePath), '/');
+        if ($relativePath === '') {
+            return;
+        }
+
+        Storage::delete($relativePath);
+        File::delete(public_path('storage/' . $relativePath));
+    }
+
+    /**
      * Store a settings image in the project's publicly served upload folder.
      *
      * This works whether public/storage is a real directory (legacy installs)
@@ -47,11 +83,12 @@ class ImageHelper
         if ($file) {
 
             if ($delete) {
-                Storage::delete($path . '/' . $delete);
+                self::deleteStorageFile($path . '/' . $delete);
             }
 
             $name = Str::random(4) . $file->getClientOriginalName();
             Storage::putFileAs($path, $file, $name);
+            self::syncStorageFileToPublic($path . '/' . $name);
 
             return $name;
         }
@@ -60,15 +97,11 @@ class ImageHelper
 
     public static function uploadSummernoteImage($file, $path)
     {
-
-        if (!file_exists($path)) {
-            mkdir($path, 0777, true);
-        }
-
         if ($file) {
 
             $name = 'OM_' . time() .  Str::random(8) . '.' . $file->getClientOriginalExtension();
             Storage::putFileAs($path, $file, $name);
+            self::syncStorageFileToPublic($path . '/' . $name);
 
             return $name;
         }
@@ -81,13 +114,14 @@ class ImageHelper
         if ($file) {
 
             if ($delete) {
-                Storage::delete($path . '/' . $delete);
+                self::deleteStorageFile($path . '/' . $delete);
             }
 
             $photoName = 'OM_' . time() .  Str::random(8) . '.' . $file->getClientOriginalExtension();
             $thumbnailName = 'OM_' . time() .  Str::random(8) . '.' . $file->getClientOriginalExtension();
 
             Storage::putFileAs($path, $file, $photoName);
+            self::syncStorageFileToPublic($path . '/' . $photoName);
 
 
             $image = \Image::make($file)->resize(230, 230);
@@ -95,6 +129,7 @@ class ImageHelper
 
             $thumbnailPath = $path . '/' . $thumbnailName;
             Storage::put($thumbnailPath, (string) $image->encode());
+            self::syncStorageFileToPublic($thumbnailPath);
 
 
             return [$photoName, $thumbnailName];
@@ -107,10 +142,11 @@ class ImageHelper
         $name = 'OM_' . time() .  Str::random(8) . '.' . $file->getClientOriginalExtension();
 
         Storage::putFileAs($path, $file, $name);
+        self::syncStorageFileToPublic($path . '/' . $name);
 
 
         if ($data[$field] != null) {
-            Storage::delete($delete_path . '/' . $data[$field]);
+            self::deleteStorageFile($delete_path . '/' . $data[$field]);
         }
 
         return $name;
@@ -129,17 +165,19 @@ class ImageHelper
 
         $thumbnailPath = $path . '/' . $thumbnailName;
         Storage::put($thumbnailPath, (string) $image->encode());
+        self::syncStorageFileToPublic($thumbnailPath);
 
 
         $photoPath = $path . '/' . $photoName;
         Storage::putFileAs($path, $file, $photoName);
+        self::syncStorageFileToPublic($photoPath);
 
         if (!empty($data['thumbnail'])) {
-            Storage::delete($delete_path . '/' . $data['thumbnail']);
+            self::deleteStorageFile($delete_path . '/' . $data['thumbnail']);
         }
 
         if (!empty($data[$field])) {
-            Storage::delete($delete_path . '/' . $data[$field]);
+            self::deleteStorageFile($delete_path . '/' . $data[$field]);
         }
 
         return [$photoName, $thumbnailName];
@@ -149,7 +187,7 @@ class ImageHelper
     public static function handleDeletedImage($data, $field, $delete_path)
     {
         if (!empty($data[$field])) {
-            Storage::delete($delete_path . '/' . $data[$field]);
+            self::deleteStorageFile($delete_path . '/' . $data[$field]);
         }
     }
 }

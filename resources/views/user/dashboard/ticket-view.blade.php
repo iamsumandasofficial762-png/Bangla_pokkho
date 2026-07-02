@@ -30,7 +30,12 @@
                         <p class="mb-0"><span class="badge badge-primary">{{$ticket->status}}</span> {{__('Subject :')}} {{$ticket->subject}}</p>
                         <a href="{{ route('user.ticket') }}" class="btn btn-primary btn-sm">{{__('Back')}}</a>
                         @if($ticket->file)
-                        <a href="{{asset('assets/files/'.$ticket->file)}}" title="Download" class="btn btn-primary btn-sm" download> {{__('Attachment')}}</a>
+                        @php
+                            $ticketFileUrl = file_exists(public_path('assets/files/' . $ticket->file))
+                                ? asset('assets/files/' . $ticket->file)
+                                : asset('storage/files/' . $ticket->file);
+                        @endphp
+                        <a href="{{ $ticketFileUrl }}" title="Download" class="btn btn-primary btn-sm" download> {{__('Attachment')}}</a>
                         @endif
                     </div>
                 </div>

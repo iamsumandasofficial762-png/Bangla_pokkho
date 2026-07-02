@@ -7,7 +7,6 @@ use App\{
     Helpers\ImageHelper
 };
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PostRepository
@@ -73,8 +72,7 @@ class PostRepository
 
         if ($photo = $request->file('photo')) {
             foreach ($storeData as $oldPhoto) {
-                Storage::delete("images" . '/' . $oldPhoto);
-                File::delete(public_path('storage/images/' . $oldPhoto));
+                ImageHelper::deleteStorageFile('images/' . $oldPhoto);
             }
 
             return [$this->storeMainImage($photo)];
@@ -132,7 +130,7 @@ class PostRepository
             // if (file_exists(base_path('../').'assets/images/'.$image)) {
             //     unlink(base_path('../').'assets/images/'.$image);
             // }
-            Storage::delete("images" . '/' . $image);
+            ImageHelper::deleteStorageFile('images/' . $image);
         }
         $post->delete();
     }
@@ -150,7 +148,7 @@ class PostRepository
         $photos = json_decode($post->photo, true);
         $delete_photo = $photos[$key];
 
-        Storage::delete("images" . '/' . $delete_photo);
+        ImageHelper::deleteStorageFile('images/' . $delete_photo);
        
         unset($photos[$key]);
         $new_photos = json_encode($photos, true);

@@ -62,7 +62,9 @@ class ItemRequest extends FormRequest
             'previous_price'  => 'max:50',
             'stock'           => 'numeric|max:9999999999',
             'tax_id'          => 'required',
-            'photo'           => $required, 'mimes:jpeg,jpg,png,svg'
+            'photo'           => $required . 'image|mimes:jpeg,jpg,png,webp,svg|max:5120',
+            'galleries'       => 'nullable|array',
+            'galleries.*'     => 'image|mimes:jpeg,jpg,png,webp,svg|max:5120',
         ];
     }
 
@@ -86,7 +88,10 @@ class ItemRequest extends FormRequest
             'discount_price.required'  =>  __('Current Price field is required.'),
             'stock.required'           =>  __('Stock field is required.'),
             'photo.required'           =>  __('Image field is required.'),
-            'photo.mimes'              =>  __('Image type must be jpg,jpeg,png,svg.')
+            'photo.mimes'              =>  __('Image type must be jpg, jpeg, png, webp, or svg.'),
+            'photo.max'                =>  __('Image size must not exceed 5MB.'),
+            'galleries.*.mimes'        =>  __('Gallery images must be jpg, jpeg, png, webp, or svg.'),
+            'galleries.*.max'          =>  __('Each gallery image must not exceed 5MB.')
         ];
     }
 

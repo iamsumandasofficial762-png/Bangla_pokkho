@@ -239,6 +239,11 @@ Route::group(['middleware' => ['adminlocalize', 'demo']], function () {
             //   Home Page Customizations
             Route::get('home-page', 'Back\HomePageController@index')->name('back.homePage');
             Route::post('home-page/update', 'Back\HomePageController@updateBanglaPokkhoHome')->name('back.homePage.update');
+            Route::post('home-page/hero-sliders', 'Back\HeroSliderController@store')->name('back.hero-sliders.store');
+            Route::put('home-page/hero-sliders/{heroSlider}', 'Back\HeroSliderController@update')->name('back.hero-sliders.update');
+            Route::delete('home-page/hero-sliders/{heroSlider}', 'Back\HeroSliderController@destroy')->name('back.hero-sliders.destroy');
+            Route::post('home-page/hero-sliders/{heroSlider}/duplicate', 'Back\HeroSliderController@duplicate')->name('back.hero-sliders.duplicate');
+            Route::post('home-page/hero-sliders-sort', 'Back\HeroSliderController@sort')->name('back.hero-sliders.sort');
             Route::post('home-page/hero/banner/update', 'Back\HomePageController@hero_banner_update')->name('back.hero.banner.update');
             Route::post('home-page/first/banner/update', 'Back\HomePageController@first_banner_update')->name('back.first.banner.update');
             Route::post('home-page/secend/banner/update', 'Back\HomePageController@secend_banner_update')->name('back.secend.banner.update');
@@ -380,6 +385,9 @@ Route::group(['middleware' => 'maintainance'], function () {
         Route::get('/faq', 'Front\FrontendController@faq')->name('front.faq');
         Route::get('/faq/{slug}', 'Front\FrontendController@show')->name('front.faq.details');
         Route::get('/contact', 'Front\FrontendController@contact')->name('front.contact');
+        Route::get('/Activity', 'Front\FrontendController@activity')->name('front.activity');
+        Route::get('/activity', 'Front\FrontendController@activity');
+        Route::get('/news', 'Front\FrontendController@news')->name('front.news');
         Route::post('/contact/submit', 'Front\FrontendController@contactEmail')->name('front.contact.submit');
         Route::get('/reviews', 'Front\FrontendController@reviews')->name('front.reviews');
         Route::get('/review/page', 'Front\FrontendController@review_submit')->name('front.rev.page');

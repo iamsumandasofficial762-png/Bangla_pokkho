@@ -812,8 +812,8 @@ body {
     align-items: stretch;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(16px);
-    background: rgba(255, 255, 255, .28);
-    border: 0;
+    background: rgba(255, 255, 255, .72);
+    border: 1px solid rgba(255, 255, 255, .55);
     border-radius: 10px;
     bottom: 32px;
     display: grid;
@@ -822,6 +822,7 @@ body {
     max-width: 960px;
     position: absolute;
     padding: 10px 8px;
+    box-shadow: 0 12px 32px rgba(17, 24, 28, .16);
     width: min(50vw, 960px);
     z-index: 3;
 }
@@ -872,8 +873,9 @@ body {
 }
 
 .home-hero-value small {
-    color: #ffffff;
+    color: #3f4749;
     font-size: 16px;
+    font-weight: 600;
     line-height: 1.5;
 }
 
@@ -1124,8 +1126,8 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     padding: 0 28px 28px;
-    scrollbar-color: #8b8b88 #ececea;
-    scrollbar-width: thin;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .heritage-detail-body:focus {
@@ -1138,17 +1140,9 @@ body {
 }
 
 .heritage-detail-body::-webkit-scrollbar {
-    width: 8px;
-}
-
-.heritage-detail-body::-webkit-scrollbar-track {
-    background: #ececea;
-}
-
-.heritage-detail-body::-webkit-scrollbar-thumb {
-    background: #8b8b88;
-    border: 2px solid #ececea;
-    border-radius: 8px;
+    display: none;
+    height: 0;
+    width: 0;
 }
 
 .heritage-detail-section {
@@ -1745,7 +1739,7 @@ body {
 
 @media (max-width: 575px) {
     .heritage-community-section {
-        padding: 42px 0 40px;
+        padding: 20px 0 20px;
     }
 
     .heritage-community-label {
@@ -1786,7 +1780,7 @@ body {
     background: #fff;
     isolation: isolate;
     overflow: hidden;
-    padding: 88px 0;
+    padding: 60px 0;
     position: relative;
 }
 
@@ -2044,7 +2038,7 @@ body {
 
 @media (max-width: 575px) {
     .about-pokkho-section {
-        padding: 48px 0;
+        padding: 20px 0;
     }
 
     .about-pokkho-layout {
@@ -2414,7 +2408,7 @@ body {
 
 @media (max-width: 575px) {
     .more-posts-section {
-        padding: 46px 0 108px;
+        padding: 20px 0 30px;
     }
 
     .more-posts-section::before {
@@ -2463,7 +2457,7 @@ body {
     background: #fff;
     color: #2c2524;
     overflow: hidden;
-    padding: 88px 0;
+    padding: 60px 0;
     position: relative;
 }
 
@@ -2740,7 +2734,7 @@ body {
 
 @media (max-width: 575px) {
     .home-faq-section {
-        padding: 52px 0;
+        padding: 20px 0;
     }
 
     .home-faq-intro h2 {

@@ -24,6 +24,7 @@ use App\Models\CampaignItem;
 use App\Models\Category;
 use App\Models\Fcategory;
 use App\Models\HomeCutomize;
+use App\Models\HeroSlider;
 use App\Models\Order;
 use App\Models\PaymentSetting;
 use App\Models\Post;
@@ -62,6 +63,7 @@ class FrontendController extends Controller
 
     public function index()
     {
+        $heroSliders = HeroSlider::active()->orderBy('sort_order')->orderBy('id')->get();
         $homeSections = HomePageContent::all();
         $carouselConfig = $homeSections['blog_carousel'];
         $latestConfig = $homeSections['all_blog_section'];
@@ -72,7 +74,7 @@ class FrontendController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return view('front.index', compact('carouselPosts', 'latestBlogs', 'blogCategories', 'homeSections'));
+        return view('front.index', compact('carouselPosts', 'latestBlogs', 'blogCategories', 'homeSections', 'heroSliders'));
     }
 
     public function homeBlogSearch(Request $request)
@@ -478,9 +480,75 @@ class FrontendController extends Controller
 
     public function page($slug)
     {
+        $bengaliContent = $this->bengaliStaticPage($slug);
+
+        if ($bengaliContent) {
+            $page = new \stdClass();
+            $page->title = $bengaliContent['title'];
+            $page->details = $bengaliContent['details'];
+        } else {
+            $page = $this->repository->displayPage($slug);
+        }
+
         return view('front.page', [
-            'page' => $this->repository->displayPage($slug)
+            'page' => $page
         ]);
+    }
+
+    public function activity()
+    {
+        return $this->renderBengaliStaticPage('activity');
+    }
+
+    public function news()
+    {
+        return $this->renderBengaliStaticPage('news');
+    }
+
+    private function renderBengaliStaticPage(string $slug)
+    {
+        $content = $this->bengaliStaticPage($slug);
+        $page = new \stdClass();
+        $page->title = $content['title'];
+        $page->details = $content['details'];
+
+        return view('front.page', compact('page'));
+    }
+
+    private function bengaliStaticPage(string $slug): ?array
+    {
+        $pages = [
+            'activity' => [
+                'title' => 'কার্যক্রম',
+                'details' => '<p>বাংলা ভাষা, সংস্কৃতি ও বাঙালির অধিকার সম্পর্কে সচেতনতা তৈরিতে বাংলা পক্ষ নিয়মিত সভা, আলোচনা, সাংস্কৃতিক অনুষ্ঠান, প্রশিক্ষণ ও জনসংযোগ কার্যক্রম আয়োজন করে।</p><p>স্থানীয় মানুষের অংশগ্রহণে পরিচালিত এসব উদ্যোগের লক্ষ্য নতুন প্রজন্মকে ইতিহাস ও ঐতিহ্যের সঙ্গে যুক্ত করা এবং একটি দায়িত্বশীল, ঐক্যবদ্ধ সমাজ গড়ে তোলা।</p>',
+            ],
+            'news' => [
+                'title' => 'সংবাদ',
+                'details' => '<p>বাংলা পক্ষের সাম্প্রতিক উদ্যোগ, কর্মসূচি, সাংস্কৃতিক আয়োজন ও জনকল্যাণমূলক কার্যক্রমের খবর এখানে প্রকাশ করা হয়।</p><p>আমাদের চলমান কার্যক্রম সম্পর্কে জানতে নিয়মিত এই পৃষ্ঠা এবং ব্লগ অনুসরণ করুন।</p>',
+            ],
+            'about-us' => [
+                'title' => 'আমাদের সম্পর্কে',
+                'details' => '<p>বাংলা পক্ষ বাংলা ভাষা, সংস্কৃতি, ঐতিহ্য ও বাঙালির ন্যায্য অধিকার রক্ষায় কাজ করা একটি সামাজিক উদ্যোগ। আমাদের লক্ষ্য হলো বাঙালির আত্মপরিচয়কে শক্তিশালী করা এবং সমাজের সকল স্তরে বাংলা ভাষার মর্যাদা প্রতিষ্ঠা করা।</p><p>সচেতনতা, শিক্ষা, সাংস্কৃতিক কার্যক্রম ও জনসম্পৃক্ততার মাধ্যমে আমরা একটি ঐক্যবদ্ধ, মানবিক ও প্রগতিশীল সমাজ গড়ে তুলতে চাই। এই পথচলায় সকল শুভানুধ্যায়ীকে আমাদের সঙ্গে থাকার আহ্বান জানাই।</p>',
+            ],
+            'how-it-works' => [
+                'title' => 'আমরা যেভাবে কাজ করি',
+                'details' => '<p>আমরা গবেষণা, জনসচেতনতা, সাংস্কৃতিক আয়োজন, প্রশিক্ষণ এবং স্বেচ্ছাসেবী কার্যক্রমের মাধ্যমে কাজ করি। স্থানীয় মানুষের মতামত ও প্রয়োজনকে গুরুত্ব দিয়ে প্রতিটি উদ্যোগ পরিকল্পনা করা হয়।</p><p>সদস্য, স্বেচ্ছাসেবক ও সহযোগী সংগঠনের সমন্বয়ে কার্যক্রম বাস্তবায়ন এবং নিয়মিত মূল্যায়নের মাধ্যমে তার প্রভাব আরও কার্যকর করা হয়।</p>',
+            ],
+            'privacy-policy' => [
+                'title' => 'গোপনীয়তা নীতি',
+                'details' => '<p>আপনার ব্যক্তিগত তথ্যের নিরাপত্তা ও গোপনীয়তা আমাদের কাছে গুরুত্বপূর্ণ। সেবা প্রদান, যোগাযোগ এবং ব্যবহারকারীর অভিজ্ঞতা উন্নত করার প্রয়োজন ছাড়া আমরা কোনো তথ্য সংগ্রহ বা ব্যবহার করি না।</p><p>আইনগত বাধ্যবাধকতা ছাড়া আপনার অনুমতি ব্যতীত ব্যক্তিগত তথ্য তৃতীয় পক্ষের কাছে প্রকাশ করা হবে না। তথ্যসংক্রান্ত কোনো প্রশ্ন থাকলে আমাদের সঙ্গে যোগাযোগ করুন।</p>',
+            ],
+            'terms-and-service' => [
+                'title' => 'শর্তাবলি ও সেবা',
+                'details' => '<p>এই ওয়েবসাইট ব্যবহার করার মাধ্যমে আপনি প্রযোজ্য আইন, নীতিমালা এবং এখানে উল্লেখিত শর্তাবলি মেনে চলতে সম্মত হচ্ছেন। ওয়েবসাইটের তথ্য কেবল বৈধ ও দায়িত্বশীল উদ্দেশ্যে ব্যবহার করা যাবে।</p><p>প্রয়োজনে আমরা সেবা বা শর্তাবলি পরিবর্তন করতে পারি। পরিবর্তিত শর্ত প্রকাশের পর ওয়েবসাইট ব্যবহার অব্যাহত রাখলে তা নতুন শর্তে সম্মতি হিসেবে বিবেচিত হবে।</p>',
+            ],
+            'return-policy' => [
+                'title' => 'ফেরত নীতি',
+                'details' => '<p>কোনো পণ্য ত্রুটিপূর্ণ, ক্ষতিগ্রস্ত বা অর্ডারের সঙ্গে অসামঞ্জস্যপূর্ণ হলে নির্ধারিত সময়ের মধ্যে আমাদের সঙ্গে যোগাযোগ করুন। যাচাই শেষে প্রযোজ্য ক্ষেত্রে পণ্য পরিবর্তন বা মূল্য ফেরতের ব্যবস্থা করা হবে।</p><p>পণ্যটি অব্যবহৃত, মূল অবস্থায় এবং প্রয়োজনীয় প্রমাণসহ থাকতে হবে। বিস্তারিত সহায়তার জন্য অর্ডারের তথ্য উল্লেখ করে যোগাযোগ করুন।</p>',
+            ],
+        ];
+
+        return $pages[mb_strtolower($slug, 'UTF-8')] ?? null;
     }
 
     // -------------------------------- CONTACT ----------------------------------------

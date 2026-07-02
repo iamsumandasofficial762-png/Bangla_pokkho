@@ -38,7 +38,12 @@
 
                                                 <div>
                                                     @if($ticket->file)
-                                                <a href="{{asset('assets/files/'.$ticket->file)}}" title="Download" class="btn btn-primary btn-sm" download> {{__('Attachment')}}</a>
+                                                @php
+                                                    $ticketFileUrl = file_exists(public_path('assets/files/' . $ticket->file))
+                                                        ? asset('assets/files/' . $ticket->file)
+                                                        : asset('storage/files/' . $ticket->file);
+                                                @endphp
+                                                <a href="{{ $ticketFileUrl }}" title="Download" class="btn btn-primary btn-sm" download> {{__('Attachment')}}</a>
                                                 @endif
                                                 @if($ticket->status != 'Closed')
                                                 <a href="{{ route('back.ticket.status',$ticket->id) }}" class="btn btn-primary btn-sm">{{__('Ticket Close')}}</a>

@@ -1,5 +1,20 @@
 @import url(paymentfont.min.css);
-@import url(https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap);
+@font-face {
+  font-family: "Li Shadhinata";
+  src: url("../fonts/Shadhinata220/Unicode/Li%20Shadhinata2%202.0%20Unicode.ttf")
+    format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Li Shadhinata";
+  src: url("../fonts/Shadhinata220/Unicode/Li%20Shadhinata2%202.0%20Unicode%20Italic.ttf")
+    format("truetype");
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+}
 .alert-primary .alert-close,
 .alert-primary a:not(.text-light),
 .alert-primary a:not(.text-white),
@@ -445,7 +460,7 @@ body {
   background-color: #f3f5f6;
   background-repeat: no-repeat;
   background-size: cover;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Li Shadhinata", sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 1.5;
@@ -572,7 +587,7 @@ blockquote::before {
 .form-control,
 .popover,
 .tooltip {
-  font-family: "Open Sans", sans-serif;
+  font-family: "Li Shadhinata", sans-serif;
 }
 .close:hover,
 .widget-light-skin.widget-cart > .entry .entry-title > a:hover,

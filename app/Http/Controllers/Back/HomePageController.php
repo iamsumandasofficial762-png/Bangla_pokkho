@@ -6,7 +6,7 @@ use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\HomeCutomize;
 use App\Models\HomePageSection;
-use App\Models\Post;
+use App\Models\HeroSlider;
 use App\Support\HomePageContent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -27,9 +27,26 @@ class HomePageController extends Controller
 
 
     public function index(){
+        $sliders = HeroSlider::orderBy('sort_order')->orderBy('id')->get();
+        $selectedSlider = request()->boolean('new')
+            ? new HeroSlider([
+                'status' => 'active',
+                'overlay_enabled' => true,
+                'overlay_color' => '#000000',
+                'overlay_opacity' => 20,
+                'sort_order' => ((int) $sliders->max('sort_order')) + ($sliders->isEmpty() ? 0 : 1),
+            ])
+            : ($sliders->firstWhere('id', request()->integer('slide')) ?? $sliders->first() ?? new HeroSlider([
+                'status' => 'active',
+                'overlay_enabled' => true,
+                'overlay_color' => '#000000',
+                'overlay_opacity' => 20,
+                'sort_order' => 0,
+            ]));
+
         return view('back.home-page.index', [
-            'sections' => HomePageContent::all(),
-            'posts' => Post::orderByDesc('created_at')->orderByDesc('id')->get(['id', 'title']),
+            'sliders' => $sliders,
+            'selectedSlider' => $selectedSlider,
         ]);
     }
 

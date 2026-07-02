@@ -232,8 +232,8 @@ class ItemRepository
 
         ImageHelper::handleDeletedImage($item,'photo','images');
         ImageHelper::handleDeletedImage($item,'thumbnail','images');
-        if($item->item_type == 'digital' && $item->file){
-            ImageHelper::handleDeletedImage($item,'file','images');
+        if (in_array($item->item_type, ['digital', 'license'], true) && $item->file) {
+            @unlink(public_path('assets/files/' . $item->file));
         }
         $item->delete();
     }

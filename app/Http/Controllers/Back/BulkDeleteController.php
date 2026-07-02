@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\ImageHelper;
 use App\Models\Item;
 use App\Models\Notification;
 use App\Models\Order;
@@ -10,7 +11,6 @@ use App\Models\Post;
 use App\Models\Transaction;
 use App\Repositories\Back\ItemRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class BulkDeleteController extends Controller
 {
@@ -56,7 +56,7 @@ class BulkDeleteController extends Controller
                 $post = Post::findOrFail($id);
                 $images = json_decode($post->photo, true);
                 foreach ($images as $image) {
-                    Storage::delete("images" . '/' . $image);
+                    ImageHelper::deleteStorageFile('images/' . $image);
                 }
                 $post->delete();
             }

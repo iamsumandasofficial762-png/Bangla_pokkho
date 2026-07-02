@@ -1,5 +1,17 @@
+@php
+    $isShopPage = request()->routeIs([
+        'front.catalog', 'front.catalog.view', 'front.product',
+        'front.cart', 'front.cart.*', 'cart.*', 'product.*',
+        'front.checkout', 'front.checkout.*', 'front.shipping.*', 'front.state.*',
+        'fornt.compare.*', 'front.compare.*', 'user.wishlist.*', 'user.order.*',
+    ]);
+    $useBanglaUi = !$isShopPage;
+    if ($useBanglaUi) {
+        app()->setLocale('bn');
+    }
+@endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ $useBanglaUi ? 'bn' : 'en' }}">
 
 <head>
     <meta charset="UTF-8">
@@ -32,7 +44,7 @@
     @endif
 
     <!-- Mobile Specific Meta Tag-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Favicon Icons-->
     <link rel="icon" type="image/png" href="{{ asset('storage/images/' . ($setting->favicon ?: 'placeholder.png')) }}">
@@ -179,6 +191,7 @@
     <style>
         {{ $setting->custom_css }}
     </style>
+    <link rel="stylesheet" href="{{ asset('css/site-responsive.css') }}?v={{ filemtime(public_path('css/site-responsive.css')) }}">
     {{-- Google AdSense Start --}}
     @if ($setting->is_google_adsense == '1')
         {!! $setting->google_adsense !!}
@@ -240,11 +253,17 @@ body_theme4 @endif
             'About Us' => 'আমাদের সম্পর্কে',
             'Shop' => 'দোকান',
             'Campaign' => 'প্রচারাভিযান',
+            'Activity' => 'কার্যক্রম',
+            'News' => 'সংবাদ',
             'Brand' => 'ব্র্যান্ড',
             'Blog' => 'ব্লগ',
             'Pages' => 'পেজ',
             'Faq' => 'প্রশ্নোত্তর',
             'Contact' => 'যোগাযোগ',
+            'How It Works' => 'আমরা যেভাবে কাজ করি',
+            'Privacy Policy' => 'গোপনীয়তা নীতি',
+            'Terms & Service' => 'শর্তাবলি ও সেবা',
+            'Return Policy' => 'ফেরত নীতি',
             'Your e-mail' => 'আপনার ই-মেইল',
             'Subscribe' => 'সাবস্ক্রাইব করুন',
             'Get In Touch' => 'যোগাযোগের তথ্য',
@@ -259,7 +278,7 @@ body_theme4 @endif
             'Min' => 'মিনিট',
             'Sec' => 'সেকেন্ড',
         ];
-        $homeLabel = fn ($text) => $isHomePage ? ($homeUiText[$text] ?? __($text)) : __($text);
+        $homeLabel = fn ($text) => $useBanglaUi ? ($homeUiText[$text] ?? __($text)) : __($text);
     @endphp
 
     <header class="site-header navbar-sticky">

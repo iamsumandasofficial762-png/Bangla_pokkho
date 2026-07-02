@@ -1,26 +1,21 @@
 @font-face {
-    font-family: 'SirajeeMisbah';
-    src: url('/fonts/SirajeeMisbah/Unicode/Li Sirajee Misbah Unicode.ttf') format('truetype');
-    font-weight: normal;
+    font-family: 'Li Shadhinata';
+    src: url('/assets/front/fonts/Shadhinata220/Unicode/Li%20Shadhinata2%202.0%20Unicode.ttf') format('truetype');
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
 }
 
-/*
- * Sirajee Misbah's Unicode TTF contains a malformed U+09DF glyph.
- * Use a Unicode Bengali system face only for য় and its combining marks.
- */
 @font-face {
-    font-family: 'BanglaYGlyphFix';
-    src: local('Nirmala UI'), local('Noto Sans Bengali');
-    font-weight: normal;
-    font-style: normal;
+    font-family: 'Li Shadhinata';
+    src: url('/assets/front/fonts/Shadhinata220/Unicode/Li%20Shadhinata2%202.0%20Unicode%20Italic.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: italic;
     font-display: swap;
-    unicode-range: U+09DF, U+09BC, U+09BE-09CC, U+09D7, U+200C-200D;
 }
 
 :root {
-    --frontend-bangla-font: 'BanglaYGlyphFix', 'SirajeeMisbah', 'Noto Serif Bengali', 'Noto Sans Bengali', sans-serif;
+    --frontend-bangla-font: 'Li Shadhinata', 'Noto Serif Bengali', 'Noto Sans Bengali', sans-serif;
 }
 
 body,
@@ -41,6 +36,7 @@ textarea,
 .heritage-community-section,
 .home-latest-blog-section {
     font-family: var(--frontend-bangla-font);
+    font-synthesis: none;
 }
 
 body {
@@ -70,8 +66,16 @@ body :where(
     th,
     td,
     figcaption
-):not(.fa):not(.fas):not(.far):not(.fal):not(.fab):not(.feather):not([class^="icon-"]):not([class*=" icon-"]):not([class^="flaticon"]):not([class*=" flaticon"]) {
+):not(.fa):not(.fas):not(.far):not(.fal):not(.fab):not(.feather):not(.pf):not([class^="icon-"]):not([class*=" icon-"]):not([class^="flaticon"]):not([class*=" flaticon"]):not([class^="pe-7s-"]):not([class*=" pe-7s-"]):not([class^="socicon-"]):not([class*=" socicon-"]) {
     font-family: var(--frontend-bangla-font) !important;
+}
+
+/* Use a font-independent breadcrumb arrow between page names. */
+.breadcrumbs > li.separator::before {
+    content: "\2192" !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 13px;
+    line-height: 1;
 }
 
 .bangla-text,

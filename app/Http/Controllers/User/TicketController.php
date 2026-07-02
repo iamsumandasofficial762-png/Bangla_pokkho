@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Helpers\EmailHelper;
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Jobs\EmailSendJob;
 use App\Models\Message;
@@ -50,14 +51,8 @@ class TicketController extends Controller
         $input['user_id'] = Auth::user()->id;
         $input['status'] = 'Open';
         // file upload 
-        if ($request->has('file') && $request->file->getClientOriginalExtension() != 'zip') {
-            Session::flash('error', __('File type not supported.'));
-        }
-        if ($request->has('file')) {
-            $file = $request->file;
-            $name = time() . str_replace(' ', '', $file->getClientOriginalName());
-            $file->move('assets/files/', $name);
-            $input['file'] = $name;
+        if ($request->hasFile('file')) {
+            $input['file'] = ImageHelper::handleUploadedImage($request->file('file'), 'files');
         }
         $ticket = Ticket::create($input);
 
@@ -134,7 +129,8 @@ class TicketController extends Controller
                 }
             }
             if ($ticket->file) {
-                @unlink('assets/files/' . $ticket->file);
+                ImageHelper::deleteStorageFile('files/' . $ticket->file);
+                @unlink(public_path('assets/files/' . $ticket->file));
             }
             $ticket->delete();
             Session::flash('success', __('Ticket Delete Successfully.'));

@@ -31,6 +31,7 @@
     @endif
 
     @yield('styles')
+    <link rel="stylesheet" href="{{ asset('assets/back/css/admin-responsive.css') }}?v={{ filemtime(public_path('assets/back/css/admin-responsive.css')) }}">
 
 </head>
 
@@ -240,7 +241,7 @@
     <!-- Custom JS -->
 
     @yield('scripts')
-    <script src="{{ asset('assets/back/js/custom.js') }}"></script>
+    <script src="{{ asset('assets/back/js/custom.js') }}?v={{ filemtime(public_path('assets/back/js/custom.js')) }}"></script>
 
 </body>
 

@@ -2,7 +2,13 @@
 @php
   
     $links = json_decode($menus->menus, true);
-    $isHomePage = request()->routeIs('front.index');
+    $isShopPage = request()->routeIs([
+        'front.catalog', 'front.catalog.view', 'front.product',
+        'front.cart', 'front.cart.*', 'cart.*', 'product.*',
+        'front.checkout', 'front.checkout.*', 'front.shipping.*', 'front.state.*',
+        'fornt.compare.*', 'front.compare.*', 'user.wishlist.*', 'user.order.*',
+    ]);
+    $useBanglaUi = !$isShopPage;
     $homeMenuText = [
         'Home' => 'হোম',
         'About Us' => 'আমাদের সম্পর্কে',
@@ -16,8 +22,12 @@
         'Faq' => 'প্রশ্নোত্তর',
         'FAQ' => 'প্রশ্নোত্তর',
         'Brand' => 'ব্র্যান্ড',
+        'How It Works' => 'আমরা যেভাবে কাজ করি',
+        'Privacy Policy' => 'গোপনীয়তা নীতি',
+        'Terms & Service' => 'শর্তাবলি ও সেবা',
+        'Return Policy' => 'ফেরত নীতি',
     ];
-    $homeMenuLabel = fn ($text) => $isHomePage ? ($homeMenuText[$text] ?? $text) : $text;
+    $homeMenuLabel = fn ($text) => $useBanglaUi ? ($homeMenuText[$text] ?? $text) : $text;
  
 @endphp
 

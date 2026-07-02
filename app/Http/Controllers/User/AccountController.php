@@ -114,7 +114,7 @@ class AccountController extends Controller
     public function removeAccount()
     {
         $user = User::where('id',Auth::user()->id)->first();
-        ImageHelper::handleDeletedImage($user,'photo','assets/images/');
+        ImageHelper::handleDeletedImage($user, 'photo', 'images');
         $user->delete();
         Session::flash('success',__('Your account successfully remove'));
         return redirect(route('front.index'));
